@@ -54,15 +54,18 @@ model Product {
 }
 
 model Order {
-  id           String      @id @default(uuid())
-  userId       String
-  user         User        @relation(fields: [userId], references: [id])
-  restaurantId String
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
-  status       String      @default("PENDING") // OrderStatus: PENDING, PREPARING, DELIVERING, DELIVERED, CANCELED
-  total        Float
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  restaurantId  String
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id])
+  status        String      @default("PENDING") // OrderStatus: PENDING, PREPARING, DELIVERING, DELIVERED, CANCELED
+  total         Float
+  paymentId     String?
+  paymentStatus String      @default("PENDING")
+  paymentMethod String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   items OrderItem[]
 }

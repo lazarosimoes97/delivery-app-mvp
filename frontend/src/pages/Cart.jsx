@@ -2,12 +2,16 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import axios from 'axios';
+import PaymentModal from '../components/PaymentModal';
 
 const Cart = () => {
     const { cart, removeFromCart, clearCart, cartTotal } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [currentOrderId, setCurrentOrderId] = useState(null);
 
     const handleCheckout = async () => {
         if (!user) {
@@ -16,16 +20,17 @@ const Cart = () => {
         }
 
         try {
-            await axios.post('/orders', {
+            const response = await axios.post('/orders', {
                 restaurantId: cart.restaurantId,
                 items: cart.items.map(item => ({
                     productId: item.productId,
                     quantity: item.quantity
                 }))
             });
-            clearCart();
-            alert('Pedido realizado com sucesso!');
-            navigate('/orders');
+
+            // Open payment modal with order ID
+            setCurrentOrderId(response.data.id);
+            setShowPaymentModal(true);
         } catch (error) {
             console.error(error);
             alert('Falha ao realizar pedido: ' + (error.response?.data?.error || error.message));
@@ -89,6 +94,17 @@ const Cart = () => {
                     </button>
                 </div>
             )}
+
+            <PaymentModal
+                isOpen={showPaymentModal}
+                onClose={() => {
+                    setShowPaymentModal(false);
+                    clearCart();
+                    navigate('/orders');
+                }}
+                orderId={currentOrderId}
+                total={cartTotal}
+            />
         </div>
     );
 };

@@ -23,6 +23,7 @@ app.get('/', (req, res) => {
 const authRoutes = require('./routes/auth.routes');
 const restaurantRoutes = require('./routes/restaurant.routes');
 const orderRoutes = require('./routes/order.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 // Temporary seed endpoint for production (remove after first use)
 app.get('/api/seed', async (req, res) => {
@@ -39,6 +40,7 @@ app.get('/api/seed', async (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
