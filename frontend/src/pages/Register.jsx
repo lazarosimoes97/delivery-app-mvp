@@ -130,6 +130,8 @@ const Register = () => {
                 };
             }
 
+            const result = await register(userData);
+
             if (result.success) {
                 if (role === 'RESTAURANT_OWNER') {
                     navigate('/admin');
