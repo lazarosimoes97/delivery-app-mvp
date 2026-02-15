@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     Trash2, Plus, LayoutGrid, ShoppingBag,
     TrendingUp, Store, ExternalLink, Image as ImageIcon,
-    AlertCircle, CheckCircle2, Package
+    AlertCircle, CheckCircle2, Package, Camera
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -107,6 +107,37 @@ const RestaurantAdmin = () => {
         }
     };
 
+    const handleUpdateRestaurantImage = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        setUploadingImage(true);
+        try {
+            const res = await axios.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const newImageUrl = res.data.url;
+
+            // Update on backend
+            await axios.put(`/restaurants/${restaurant.id}`, {
+                ...restaurant,
+                imageUrl: newImageUrl
+            });
+
+            // Update local state
+            setRestaurant(prev => ({ ...prev, imageUrl: newImageUrl }));
+        } catch (error) {
+            console.error('Erro ao atualizar imagem do restaurante:', error);
+            alert('Falha ao atualizar foto do restaurante.');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
@@ -141,14 +172,20 @@ const RestaurantAdmin = () => {
                 <div className="max-w-6xl mx-auto px-4 py-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gray-100 rounded-2xl overflow-hidden border border-gray-100">
-                                {restaurant.imageUrl ? (
-                                    <img src={restaurant.imageUrl} alt={restaurant.name} className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center bg-red-50 text-red-600">
-                                        <Store className="w-8 h-8" />
-                                    </div>
-                                )}
+                            <div className="relative group">
+                                <div className="w-16 h-16 bg-gray-100 rounded-2xl overflow-hidden border border-gray-100">
+                                    {restaurant.imageUrl ? (
+                                        <img src={restaurant.imageUrl} alt={restaurant.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center bg-red-50 text-red-600">
+                                            <Store className="w-8 h-8" />
+                                        </div>
+                                    )}
+                                </div>
+                                <label className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-2xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                                    <input type="file" className="hidden" onChange={handleUpdateRestaurantImage} accept="image/*" />
+                                    <Camera className="w-5 h-5 text-white" />
+                                </label>
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-900">{restaurant.name}</h1>

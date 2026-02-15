@@ -10,6 +10,7 @@ router.get('/:id', restaurantController.getRestaurantById);
 
 // Protected routes (Restaurant Owner)
 router.post('/', authMiddleware, restaurantController.createRestaurant);
+router.put('/:id', authMiddleware, restaurantController.updateRestaurant);
 router.post('/products', authMiddleware, productController.createProduct);
 router.put('/products/:id', authMiddleware, productController.updateProduct);
 router.delete('/products/:id', authMiddleware, productController.deleteProduct);

@@ -33,6 +33,7 @@ exports.register = async (req, res) => {
                         type: restaurant.type,
                         category: restaurant.category,
                         description: restaurant.description,
+                        imageUrl: restaurant.imageUrl,
 
                         // Address Details
                         zipCode: restaurant.zipCode,

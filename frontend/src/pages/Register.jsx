@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Store, User, ChevronRight, Search, MapPin } from 'lucide-react';
+import { Store, User, ChevronRight, Search, MapPin, Image as ImageIcon, CheckCircle2, Plus } from 'lucide-react';
 import axios from 'axios';
 import LocationPicker from '../components/LocationPicker';
 
@@ -21,17 +21,29 @@ const Register = () => {
     const [type, setType] = useState('Restaurante');
     const [category, setCategory] = useState('Geral');
     const [description, setDescription] = useState('');
+    const [restaurantImage, setRestaurantImage] = useState('');
+    const [uploadingImage, setUploadingImage] = useState(false);
 
-    // Address Data
-    const [zipCode, setZipCode] = useState('');
-    const [state, setState] = useState('');
-    const [city, setCity] = useState('');
-    const [neighborhood, setNeighborhood] = useState('');
-    const [street, setStreet] = useState('');
-    const [number, setNumber] = useState('');
-    const [complement, setComplement] = useState('');
-    const [reference, setReference] = useState('');
-    const [location, setLocation] = useState({ lat: -23.550520, lng: -46.633308 }); // Default SP
+    const handleRestaurantImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        setUploadingImage(true);
+        try {
+            const res = await axios.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            setRestaurantImage(res.data.url);
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            alert('Falha ao subir imagem do restaurante.');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
 
     const [error, setError] = useState('');
     const { register } = useAuth();
@@ -118,6 +130,7 @@ const Register = () => {
                     type,
                     category,
                     description,
+                    imageUrl: restaurantImage,
                     // Address Details
                     zipCode,
                     state,
@@ -313,6 +326,42 @@ const Register = () => {
                                             <option value="Doces & Bolos">Doces & Bolos</option>
                                             <option value="Açaí">Açaí</option>
                                         </select>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-gray-700 text-sm font-medium mb-2 flex items-center gap-2">
+                                            <ImageIcon className="w-4 h-4 text-blue-600" /> Foto de Capa do Restaurante
+                                        </label>
+                                        <div className="flex items-center gap-4">
+                                            <label className="cursor-pointer bg-gray-50 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors p-4 rounded-xl flex-1 flex flex-col items-center justify-center gap-2 min-h-[100px]">
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    onChange={handleRestaurantImageUpload}
+                                                    accept="image/*"
+                                                />
+                                                {uploadingImage ? (
+                                                    <div className="flex items-center gap-2 text-gray-500">
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                                                        Subindo...
+                                                    </div>
+                                                ) : restaurantImage ? (
+                                                    <div className="flex items-center gap-2 text-green-600 font-bold">
+                                                        <CheckCircle2 className="w-5 h-5" />
+                                                        Foto Escolhida!
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-1 text-gray-400">
+                                                        <Plus className="w-5 h-5" />
+                                                        <span className="text-xs">Subir Logo ou Fachada</span>
+                                                    </div>
+                                                )}
+                                            </label>
+                                            {restaurantImage && (
+                                                <div className="w-24 h-24 rounded-xl overflow-hidden border border-gray-200">
+                                                    <img src={restaurantImage} alt="Preview" className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-gray-700 text-sm font-medium mb-2">Descrição</label>

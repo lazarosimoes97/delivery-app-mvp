@@ -58,3 +58,35 @@ exports.getRestaurantById = async (req, res) => {
         res.status(500).json({ error: 'Error fetching restaurant', details: error.message });
     }
 };
+exports.updateRestaurant = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description, category, type, imageUrl } = req.body;
+        const userId = req.user.id;
+
+        const restaurant = await prisma.restaurant.findUnique({ where: { id } });
+
+        if (!restaurant) {
+            return res.status(404).json({ error: 'Restaurant not found' });
+        }
+
+        if (restaurant.ownerId !== userId) {
+            return res.status(403).json({ error: 'Unauthorized to update this restaurant' });
+        }
+
+        const updatedRestaurant = await prisma.restaurant.update({
+            where: { id },
+            data: {
+                name,
+                description,
+                category,
+                type,
+                imageUrl
+            }
+        });
+
+        res.json(updatedRestaurant);
+    } catch (error) {
+        res.status(500).json({ error: 'Error updating restaurant', details: error.message });
+    }
+};
