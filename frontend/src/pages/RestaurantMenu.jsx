@@ -195,7 +195,7 @@ const AddToOrderButton = ({ product, restaurantId, addToCart }) => {
             )}
 
             {added && (
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap animate-bounce">
+                <span className="absolute -top-8 right-0 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap animate-bounce">
                     Adicionado!
                 </span>
             )}
