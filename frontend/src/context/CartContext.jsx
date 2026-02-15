@@ -21,7 +21,7 @@ export const CartProvider = ({ children }) => {
             let currentRestaurantId = prevCart.restaurantId;
 
             if (currentRestaurantId && currentRestaurantId !== restaurantId) {
-                if (!confirm("Start new cart? Adding items from a different restaurant will clear your current cart.")) {
+                if (!confirm("Deseja iniciar um novo carrinho? Adicionar itens de um restaurante diferente limpará seu carrinho atual.")) {
                     return prevCart;
                 }
                 newItems = [];
