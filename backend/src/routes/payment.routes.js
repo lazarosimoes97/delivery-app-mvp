@@ -3,8 +3,11 @@ const router = express.Router();
 const paymentController = require('../controllers/payment.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 
-// Create payment preference
-router.post('/create', authMiddleware, paymentController.createPayment);
+// Create PIX payment
+router.post('/pix', authMiddleware, paymentController.createPixPayment);
+
+// Create card payment
+router.post('/card', authMiddleware, paymentController.createCardPayment);
 
 // Webhook for payment notifications
 router.post('/webhook', paymentController.webhook);

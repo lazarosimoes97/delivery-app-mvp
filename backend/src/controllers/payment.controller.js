@@ -1,4 +1,4 @@
-const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
+const { MercadoPagoConfig, Payment } = require('mercadopago');
 const prisma = require('../prisma');
 
 // Configure Mercado Pago
@@ -6,11 +6,10 @@ const client = new MercadoPagoConfig({
     accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN
 });
 
-const preferenceClient = new Preference(client);
 const paymentClient = new Payment(client);
 
-// Create payment preference
-exports.createPayment = async (req, res) => {
+// Create PIX payment
+exports.createPixPayment = async (req, res) => {
     try {
         const { orderId } = req.body;
 
@@ -32,48 +31,103 @@ exports.createPayment = async (req, res) => {
             return res.status(404).json({ error: 'Pedido não encontrado' });
         }
 
-        // Create preference for Mercado Pago
-        const preference = {
-            items: order.items.map(item => ({
-                title: item.product.name,
-                unit_price: item.price,
-                quantity: item.quantity,
-            })),
+        // Create PIX payment
+        const paymentData = {
+            transaction_amount: order.total,
+            description: `Pedido ${order.restaurant.name}`,
+            payment_method_id: 'pix',
             payer: {
                 email: order.user.email,
-                name: order.user.name
+                first_name: order.user.name.split(' ')[0],
+                last_name: order.user.name.split(' ').slice(1).join(' ') || order.user.name.split(' ')[0]
             },
-            back_urls: {
-                success: `${process.env.FRONTEND_URL}/orders/${orderId}/success`,
-                failure: `${process.env.FRONTEND_URL}/orders/${orderId}/failure`,
-                pending: `${process.env.FRONTEND_URL}/orders/${orderId}/pending`
-            },
-            auto_return: 'approved',
-            external_reference: orderId,
             notification_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
-            statement_descriptor: order.restaurant.name,
+            external_reference: orderId
         };
 
-        const response = await preferenceClient.create({ body: preference });
+        const payment = await paymentClient.create({ body: paymentData });
 
         // Update order with payment ID
         await prisma.order.update({
             where: { id: orderId },
             data: {
-                paymentId: response.id,
-                paymentStatus: 'PENDING'
+                paymentId: payment.id.toString(),
+                paymentStatus: 'PENDING',
+                paymentMethod: 'pix'
+            }
+        });
+
+        // Return QR Code data
+        res.json({
+            paymentId: payment.id,
+            status: payment.status,
+            qrCode: payment.point_of_interaction.transaction_data.qr_code,
+            qrCodeBase64: payment.point_of_interaction.transaction_data.qr_code_base64,
+            ticketUrl: payment.point_of_interaction.transaction_data.ticket_url
+        });
+
+    } catch (error) {
+        console.error('Error creating PIX payment:', error);
+        res.status(500).json({ error: 'Erro ao criar pagamento PIX', details: error.message });
+    }
+};
+
+// Create card payment
+exports.createCardPayment = async (req, res) => {
+    try {
+        const { orderId, token, installments, paymentMethodId } = req.body;
+
+        // Get order details
+        const order = await prisma.order.findUnique({
+            where: { id: orderId },
+            include: {
+                user: true,
+                restaurant: true
+            }
+        });
+
+        if (!order) {
+            return res.status(404).json({ error: 'Pedido não encontrado' });
+        }
+
+        // Create card payment
+        const paymentData = {
+            transaction_amount: order.total,
+            token,
+            description: `Pedido ${order.restaurant.name}`,
+            installments: installments || 1,
+            payment_method_id: paymentMethodId,
+            payer: {
+                email: order.user.email,
+                first_name: order.user.name.split(' ')[0],
+                last_name: order.user.name.split(' ').slice(1).join(' ') || order.user.name.split(' ')[0]
+            },
+            notification_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
+            external_reference: orderId
+        };
+
+        const payment = await paymentClient.create({ body: paymentData });
+
+        // Update order with payment info
+        await prisma.order.update({
+            where: { id: orderId },
+            data: {
+                paymentId: payment.id.toString(),
+                paymentStatus: payment.status === 'approved' ? 'APPROVED' : 'PENDING',
+                paymentMethod: paymentMethodId,
+                status: payment.status === 'approved' ? 'PREPARING' : 'PENDING'
             }
         });
 
         res.json({
-            preferenceId: response.id,
-            initPoint: response.init_point,
-            sandboxInitPoint: response.sandbox_init_point
+            paymentId: payment.id,
+            status: payment.status,
+            statusDetail: payment.status_detail
         });
 
     } catch (error) {
-        console.error('Error creating payment:', error);
-        res.status(500).json({ error: 'Erro ao criar pagamento' });
+        console.error('Error creating card payment:', error);
+        res.status(500).json({ error: 'Erro ao processar pagamento', details: error.message });
     }
 };
 
@@ -91,6 +145,10 @@ exports.webhook = async (req, res) => {
             // Find order by external_reference
             const orderId = payment.external_reference;
 
+            if (!orderId) {
+                return res.status(200).send('OK');
+            }
+
             // Update order payment status
             let paymentStatus = 'PENDING';
             let orderStatus = 'PENDING';
@@ -106,6 +164,9 @@ exports.webhook = async (req, res) => {
                     break;
                 case 'in_process':
                     paymentStatus = 'IN_PROCESS';
+                    break;
+                case 'pending':
+                    paymentStatus = 'PENDING';
                     break;
                 default:
                     paymentStatus = 'PENDING';
@@ -138,7 +199,8 @@ exports.getPaymentStatus = async (req, res) => {
             select: {
                 paymentStatus: true,
                 paymentMethod: true,
-                status: true
+                status: true,
+                paymentId: true
             }
         });
 
