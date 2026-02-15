@@ -75,6 +75,10 @@ export const CartProvider = ({ children }) => {
         });
     };
 
+    const clearCart = () => {
+        setCart({ restaurantId: null, items: [] });
+    };
+
     const cartTotal = cart.items.reduce((total, item) => total + item.price * item.quantity, 0);
     const cartItemsCount = cart.items.reduce((count, item) => count + item.quantity, 0);
 
