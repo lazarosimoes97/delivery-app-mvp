@@ -13,6 +13,7 @@ const RestaurantAdmin = () => {
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
 
     // Quick Stats (Mocked for now, but ready for API)
     const [stats] = useState({
@@ -48,6 +49,27 @@ const RestaurantAdmin = () => {
         };
         fetchMyRestaurant();
     }, [user]);
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        setUploadingImage(true);
+        try {
+            const res = await axios.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            setNewProduct(prev => ({ ...prev, imageUrl: res.data.url }));
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            alert('Falha ao subir imagem. Verifique se as chaves do Cloudinary estão configuradas no .env');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
 
     const handleCreateProduct = async (e) => {
         e.preventDefault();
@@ -254,21 +276,50 @@ const RestaurantAdmin = () => {
                                     </div>
                                     <div className="lg:col-span-3">
                                         <label className="block text-xs font-bold text-gray-400 uppercase mb-2 flex items-center gap-2">
-                                            <ImageIcon className="w-3 h-3" /> URL da Foto (opcional)
+                                            <ImageIcon className="w-3 h-3" /> Foto do Produto (Upload)
                                         </label>
-                                        <input
-                                            placeholder="https://imagem.com/foto.jpg"
-                                            className="w-full p-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none"
-                                            value={newProduct.imageUrl}
-                                            onChange={e => setNewProduct({ ...newProduct, imageUrl: e.target.value })}
-                                        />
+                                        <div className="flex items-center gap-4">
+                                            <label className="cursor-pointer bg-white border-2 border-dashed border-gray-200 hover:border-red-400 transition-colors p-4 rounded-2xl flex-1 flex flex-col items-center justify-center gap-2">
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
+                                                    onChange={handleImageUpload}
+                                                    accept="image/*"
+                                                />
+                                                {uploadingImage ? (
+                                                    <div className="flex items-center gap-2 text-gray-500">
+                                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                                                        Subindo...
+                                                    </div>
+                                                ) : newProduct.imageUrl ? (
+                                                    <div className="flex items-center gap-2 text-green-600 font-bold">
+                                                        <CheckCircle2 className="w-5 h-5" />
+                                                        Imagem pronta!
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-center gap-1 text-gray-400">
+                                                        <Plus className="w-6 h-6" />
+                                                        <span className="text-sm">Clique para subir imagem</span>
+                                                    </div>
+                                                )}
+                                            </label>
+                                            {newProduct.imageUrl && (
+                                                <div className="w-20 h-20 rounded-xl overflow-hidden border border-gray-200">
+                                                    <img src={newProduct.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex justify-end gap-3">
                                     <button type="button" onClick={() => setIsCreating(false)} className="px-6 py-2.5 text-gray-500 font-bold hover:text-gray-700">
                                         Cancelar
                                     </button>
-                                    <button type="submit" className="bg-red-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-100 transition">
+                                    <button
+                                        type="submit"
+                                        disabled={uploadingImage}
+                                        className={`bg-red-600 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-100 transition ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
                                         Salvar Produto
                                     </button>
                                 </div>
