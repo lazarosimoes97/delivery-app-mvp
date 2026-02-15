@@ -19,8 +19,13 @@ app.get('/', (req, res) => {
   res.send('Delivery App API is running');
 });
 
+// Import routes
+const authRoutes = require('./routes/auth.routes');
+const restaurantRoutes = require('./routes/restaurant.routes');
+const orderRoutes = require('./routes/order.routes');
+
 // Temporary seed endpoint for production (remove after first use)
-app.get('/seed', async (req, res) => {
+app.get('/api/seed', async (req, res) => {
   try {
     const seed = require('../prisma/seed');
     await seed();
@@ -29,11 +34,6 @@ app.get('/seed', async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
-
-// Import routes
-const authRoutes = require('./routes/auth.routes');
-const restaurantRoutes = require('./routes/restaurant.routes');
-const orderRoutes = require('./routes/order.routes');
 
 // Use routes
 app.use('/api/auth', authRoutes);
