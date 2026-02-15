@@ -81,7 +81,7 @@ const RestaurantAdmin = () => {
                 category: newProduct.category || 'Geral'
             };
 
-            const res = await axios.post('/products', productData);
+            const res = await axios.post('/restaurants/products', productData);
             setRestaurant(prev => ({
                 ...prev,
                 products: [...prev.products, res.data]
@@ -97,7 +97,7 @@ const RestaurantAdmin = () => {
     const handleDeleteProduct = async (id) => {
         if (!confirm('Tem certeza que deseja excluir este produto?')) return;
         try {
-            await axios.delete(`/products/${id}`);
+            await axios.delete(`/restaurants/products/${id}`);
             setRestaurant(prev => ({
                 ...prev,
                 products: prev.products.filter(p => p.id !== id)

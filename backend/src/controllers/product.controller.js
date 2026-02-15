@@ -2,7 +2,7 @@ const prisma = require('../prisma');
 
 exports.createProduct = async (req, res) => {
     try {
-        const { name, description, price, imageUrl, restaurantId } = req.body;
+        const { name, description, price, category, imageUrl, restaurantId } = req.body;
         const userId = req.user.id;
 
         // Verify ownership
@@ -19,6 +19,7 @@ exports.createProduct = async (req, res) => {
                 name,
                 description,
                 price: parseFloat(price),
+                category: category || 'General',
                 imageUrl,
                 restaurantId,
             },
@@ -33,7 +34,7 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, price, imageUrl } = req.body;
+        const { name, description, price, category, imageUrl } = req.body;
         const userId = req.user.id;
 
         const product = await prisma.product.findUnique({ where: { id }, include: { restaurant: true } });
@@ -47,6 +48,7 @@ exports.updateProduct = async (req, res) => {
                 name,
                 description,
                 price: parseFloat(price),
+                category: category,
                 imageUrl
             }
         });
