@@ -1,10 +1,13 @@
-const mercadopago = require('mercadopago');
+const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const prisma = require('../prisma');
 
 // Configure Mercado Pago
-mercadopago.configure({
-    access_token: process.env.MERCADOPAGO_ACCESS_TOKEN
+const client = new MercadoPagoConfig({
+    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN
 });
+
+const preferenceClient = new Preference(client);
+const paymentClient = new Payment(client);
 
 // Create payment preference
 exports.createPayment = async (req, res) => {
@@ -51,21 +54,21 @@ exports.createPayment = async (req, res) => {
             statement_descriptor: order.restaurant.name,
         };
 
-        const response = await mercadopago.preferences.create(preference);
+        const response = await preferenceClient.create({ body: preference });
 
         // Update order with payment ID
         await prisma.order.update({
             where: { id: orderId },
             data: {
-                paymentId: response.body.id,
+                paymentId: response.id,
                 paymentStatus: 'PENDING'
             }
         });
 
         res.json({
-            preferenceId: response.body.id,
-            initPoint: response.body.init_point,
-            sandboxInitPoint: response.body.sandbox_init_point
+            preferenceId: response.id,
+            initPoint: response.init_point,
+            sandboxInitPoint: response.sandbox_init_point
         });
 
     } catch (error) {
@@ -83,16 +86,16 @@ exports.webhook = async (req, res) => {
             const paymentId = data.id;
 
             // Get payment details from Mercado Pago
-            const payment = await mercadopago.payment.findById(paymentId);
+            const payment = await paymentClient.get({ id: paymentId });
 
             // Find order by external_reference
-            const orderId = payment.body.external_reference;
+            const orderId = payment.external_reference;
 
             // Update order payment status
             let paymentStatus = 'PENDING';
             let orderStatus = 'PENDING';
 
-            switch (payment.body.status) {
+            switch (payment.status) {
                 case 'approved':
                     paymentStatus = 'APPROVED';
                     orderStatus = 'PREPARING';
@@ -113,7 +116,7 @@ exports.webhook = async (req, res) => {
                 data: {
                     paymentStatus,
                     status: orderStatus,
-                    paymentMethod: payment.body.payment_method_id
+                    paymentMethod: payment.payment_method_id
                 }
             });
         }
