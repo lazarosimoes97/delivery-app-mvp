@@ -407,11 +407,18 @@ const Register = () => {
                                     <label className="block text-gray-700 text-sm font-medium mb-2">
                                         Confira a localização no mapa (Arraste o marcador se necessário)
                                     </label>
-                                    <div className="h-[300px] w-full rounded-lg overflow-hidden border">
+                                    <div className="h-[300px] w-full rounded-lg overflow-hidden border relative">
                                         <LocationPicker
                                             onLocationChange={setLocation}
                                             initialPosition={location}
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => fetchCoordinates(street, city, state, zipCode)}
+                                            className="absolute top-2 right-2 z-[1000] bg-white p-2 rounded-md shadow-md text-xs font-bold text-blue-600 hover:bg-gray-50 border border-gray-200"
+                                        >
+                                            🔄 Atualizar Mapa
+                                        </button>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1 text-center">
                                         Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
@@ -425,8 +432,8 @@ const Register = () => {
                         type="submit"
                         disabled={loading}
                         className={`w-full py-3 rounded-lg font-bold text-white transition-colors ${role === 'CLIENT'
-                                ? 'bg-red-600 hover:bg-red-700'
-                                : 'bg-blue-600 hover:bg-blue-700'
+                            ? 'bg-red-600 hover:bg-red-700'
+                            : 'bg-blue-600 hover:bg-blue-700'
                             }`}
                     >
                         {loading ? 'Cadastrando...' : 'Finalizar Cadastro'}
