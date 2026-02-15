@@ -29,6 +29,9 @@ model Restaurant {
   description String?
   address     String
   imageUrl    String?
+  document    String?  // CPF ou CNPJ
+  type        String?  // Tipo de estabelecimento
+  category    String?  // Categoria principal
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id])
   createdAt   DateTime @default(now())

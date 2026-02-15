@@ -5,7 +5,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'secret_key';
 
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password, role, restaurant } = req.body;
 
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
@@ -14,6 +14,50 @@ exports.register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // If role is RESTAURANT_OWNER, create user and restaurant in a transaction
+        if (role === 'RESTAURANT_OWNER' && restaurant) {
+            const result = await prisma.$transaction(async (prisma) => {
+                const user = await prisma.user.create({
+                    data: {
+                        name,
+                        email,
+                        password: hashedPassword,
+                        role,
+                    },
+                });
+
+                const newRestaurant = await prisma.restaurant.create({
+                    data: {
+                        name: restaurant.name,
+                        document: restaurant.document,
+                        type: restaurant.type,
+                        category: restaurant.category,
+                        description: restaurant.description,
+                        address: restaurant.address,
+                        ownerId: user.id
+                    }
+                });
+
+                return { user, restaurant: newRestaurant };
+            });
+
+            const token = jwt.sign({ id: result.user.id, role: result.user.role }, JWT_SECRET, {
+                expiresIn: '1d',
+            });
+
+            return res.status(201).json({
+                user: {
+                    id: result.user.id,
+                    name: result.user.name,
+                    email: result.user.email,
+                    role: result.user.role
+                },
+                restaurant: result.restaurant,
+                token
+            });
+        }
+
+        // Regular CLIENT registration
         const user = await prisma.user.create({
             data: {
                 name,
@@ -29,6 +73,7 @@ exports.register = async (req, res) => {
 
         res.status(201).json({ user: { id: user.id, name: user.name, email: user.email, role: user.role }, token });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Error registering user', details: error.message });
     }
 };
