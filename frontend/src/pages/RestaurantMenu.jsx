@@ -162,7 +162,7 @@ const RestaurantMenu = () => {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    addToCart({ ...product, restaurantId: restaurant.id, restaurantName: restaurant.name });
+                                                    addToCart(product, 1, restaurant.id);
                                                 }}
                                                 className="absolute bottom-[-10px] right-[-5px] bg-white shadow-md text-red-600 p-1.5 rounded-full border border-gray-100"
                                             >
