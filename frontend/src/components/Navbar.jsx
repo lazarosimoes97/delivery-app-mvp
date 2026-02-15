@@ -5,7 +5,7 @@ import { ShoppingCart, User, LogOut } from 'lucide-react';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
-    const { cartTotal } = useCart();
+    const { cartTotal, cartItemsCount } = useCart();
 
     return (
         <nav className="bg-red-600 text-white shadow-md sticky top-0 z-40">
@@ -24,12 +24,12 @@ const Navbar = () => {
                             </Link>
                             <Link to="/cart" className="flex items-center hover:text-red-200 relative">
                                 <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
-                                <span className="hidden md:inline ml-1">R$ {cartTotal.toFixed(2)}</span>
-                                {cartTotal > 0 && (
-                                    <span className="md:hidden absolute -top-2 -right-2 bg-white text-red-600 text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                                        !
+                                {cartItemsCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-white text-red-600 text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center border border-red-600 shadow-sm">
+                                        {cartItemsCount}
                                     </span>
                                 )}
+                                <span className="hidden md:inline ml-2 text-sm font-bold">R$ {cartTotal.toFixed(2)}</span>
                             </Link>
                             <div className="flex items-center space-x-1 md:space-x-2">
                                 <User className="w-5 h-5 md:w-6 md:h-6" />

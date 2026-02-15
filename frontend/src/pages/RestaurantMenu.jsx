@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, Search, Star, Clock, MapPin, Plus } from 'lucide-react';
+import { ChevronLeft, Search, Star, Clock, MapPin, Plus, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const RestaurantMenu = () => {
@@ -159,15 +159,7 @@ const RestaurantMenu = () => {
                                                 alt={product.name}
                                                 className="w-full h-full object-cover rounded-lg"
                                             />
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    addToCart(product, 1, restaurant.id);
-                                                }}
-                                                className="absolute bottom-[-10px] right-[-5px] bg-white shadow-md text-red-600 p-1.5 rounded-full border border-gray-100"
-                                            >
-                                                <Plus className="w-5 h-5" />
-                                            </button>
+                                            <AddToOrderButton product={product} restaurantId={restaurant.id} addToCart={addToCart} />
                                         </div>
                                     </div>
                                 ))}
@@ -177,6 +169,37 @@ const RestaurantMenu = () => {
                 )}
             </div>
         </div>
+    );
+};
+
+const AddToOrderButton = ({ product, restaurantId, addToCart }) => {
+    const [added, setAdded] = useState(false);
+
+    const handleClick = (e) => {
+        e.stopPropagation();
+        addToCart(product, 1, restaurantId);
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2000);
+    };
+
+    return (
+        <button
+            onClick={handleClick}
+            className={`absolute bottom-[-10px] right-[-5px] shadow-md p-1.5 rounded-full border border-gray-100 transition-all duration-300 flex items-center justify-center min-w-[32px] h-[32px] ${added ? 'bg-green-500 text-white scale-110' : 'bg-white text-red-600'
+                }`}
+        >
+            {added ? (
+                <Check className="w-5 h-5 animate-in zoom-in duration-300" />
+            ) : (
+                <Plus className="w-5 h-5" />
+            )}
+
+            {added && (
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap animate-bounce">
+                    Adicionado!
+                </span>
+            )}
+        </button>
     );
 };
 

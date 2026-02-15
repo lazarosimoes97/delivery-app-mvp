@@ -1,13 +1,13 @@
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Plus, Minus } from 'lucide-react';
 import { useState } from 'react';
 import axios from 'axios';
 import PaymentModal from '../components/PaymentModal';
 
 const Cart = () => {
-    const { cart, removeFromCart, clearCart, cartTotal } = useCart();
+    const { cart, removeFromCart, updateQuantity, clearCart, cartTotal } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -47,14 +47,32 @@ const Cart = () => {
                         {cart.items.map((item) => (
                             <div key={item.productId} className="flex flex-col md:flex-row md:justify-between md:items-center p-4 border-b border-gray-100 last:border-b-0 gap-3 md:gap-0">
                                 <div className="flex-1">
-                                    <h3 className="font-semibold text-gray-800">{item.name}</h3>
-                                    <div className="text-gray-500 text-sm">Quantidade: {item.quantity}</div>
+                                    <h3 className="font-semibold text-gray-800 mb-2">{item.name}</h3>
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                                            <button
+                                                onClick={() => updateQuantity(item.productId, -1)}
+                                                className="p-1 px-2 hover:bg-gray-200 text-gray-600 transition"
+                                            >
+                                                <Minus className="w-3 h-3" />
+                                            </button>
+                                            <span className="px-2 text-sm font-bold text-gray-700 min-w-[20px] text-center">
+                                                {item.quantity}
+                                            </span>
+                                            <button
+                                                onClick={() => updateQuantity(item.productId, 1)}
+                                                className="p-1 px-2 hover:bg-gray-200 text-gray-600 transition"
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="flex justify-between md:justify-end items-center w-full md:w-auto gap-4">
                                     <div className="font-bold text-gray-800">R$ {(item.price * item.quantity).toFixed(2)}</div>
                                     <button
                                         onClick={() => removeFromCart(item.productId)}
-                                        className="text-gray-400 hover:text-red-500 p-1"
+                                        className="text-gray-400 hover:text-red-500 p-1 bg-gray-50 rounded-full hover:bg-red-50 transition"
                                         aria-label="Remover item"
                                     >
                                         <Trash2 className="w-5 h-5" />

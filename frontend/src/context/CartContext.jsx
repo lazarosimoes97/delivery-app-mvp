@@ -57,14 +57,29 @@ export const CartProvider = ({ children }) => {
         });
     };
 
-    const clearCart = () => {
-        setCart({ restaurantId: null, items: [] });
+    const updateQuantity = (productId, delta) => {
+        setCart((prevCart) => {
+            const newItems = prevCart.items.map((item) => {
+                if (item.productId === productId) {
+                    const newQuantity = item.quantity + delta;
+                    return newQuantity > 0 ? { ...item, quantity: newQuantity } : null;
+                }
+                return item;
+            }).filter(Boolean);
+
+            return {
+                ...prevCart,
+                items: newItems,
+                restaurantId: newItems.length === 0 ? null : prevCart.restaurantId
+            };
+        });
     };
 
     const cartTotal = cart.items.reduce((total, item) => total + item.price * item.quantity, 0);
+    const cartItemsCount = cart.items.reduce((count, item) => count + item.quantity, 0);
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, cartTotal }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartItemsCount }}>
             {children}
         </CartContext.Provider>
     );
