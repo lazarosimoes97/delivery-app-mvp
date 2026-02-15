@@ -54,8 +54,8 @@ const Register = () => {
                     setCity(response.data.localidade);
                     setState(response.data.uf);
 
-                    // Tentar obter coordenadas do endereço via OpenStreetMap Nominatim (Opcional, mas ajuda a centralizar o mapa)
-                    fetchCoordinates(response.data.logradouro, response.data.localidade, response.data.uf);
+                    // Tentar obter coordenadas do endereço
+                    fetchCoordinates(response.data.logradouro, response.data.localidade, response.data.uf, cleanZip);
                 }
             } catch (error) {
                 console.error("Erro ao buscar CEP", error);
@@ -63,10 +63,30 @@ const Register = () => {
         }
     };
 
-    const fetchCoordinates = async (logradouro, localidade, uf) => {
+    const fetchCoordinates = async (logradouro, localidade, uf, cep) => {
         try {
-            const query = `${logradouro}, ${localidade}, ${uf}, Brazil`;
-            const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            // TENTATIVA 1: Endereço completo
+            let query = `${logradouro}, ${localidade}, ${uf}, Brazil`;
+            if (!logradouro) query = `${localidade}, ${uf}, Brazil`;
+
+            let response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+
+            // TENTATIVA 2: Apenas o CEP (muito preciso se o OSM tiver o CEP mapeado)
+            if ((!response.data || response.data.length === 0) && cep) {
+                const cepQuery = `${cep.substring(0, 5)}-${cep.substring(5)}, Brazil`;
+                response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cepQuery)}`);
+
+                // Backup se o CEP com hífen não funcionar
+                if (!response.data || response.data.length === 0) {
+                    response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${cep}, Brazil`);
+                }
+            }
+
+            // TENTATIVA 3: Apenas Cidade e Estado (último recurso)
+            if (!response.data || response.data.length === 0) {
+                response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${localidade}, ${uf}, Brazil`);
+            }
+
             if (response.data && response.data.length > 0) {
                 const { lat, lon } = response.data[0];
                 setLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
