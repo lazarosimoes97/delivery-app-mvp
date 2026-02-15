@@ -130,10 +130,12 @@ const Register = () => {
                 };
             }
 
-            const result = await register(userData);
-
             if (result.success) {
-                navigate('/');
+                if (role === 'RESTAURANT_OWNER') {
+                    navigate('/admin');
+                } else {
+                    navigate('/');
+                }
             } else {
                 setError(result.error || 'Erro ao criar conta');
             }
