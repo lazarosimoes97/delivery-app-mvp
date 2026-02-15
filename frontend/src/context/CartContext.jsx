@@ -1,18 +1,30 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useRef } from 'react';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
+    const { user } = useAuth();
     const [cart, setCart] = useState(() => {
         const storedCart = localStorage.getItem('cart');
         return storedCart ? JSON.parse(storedCart) : { restaurantId: null, items: [] };
     });
 
+    const lastUserId = useRef(user?.id);
+
     useEffect(() => {
         localStorage.setItem('cart', JSON.stringify(cart));
     }, [cart]);
+
+    // Limpar carrinho se o usuário mudar (login/logout)
+    useEffect(() => {
+        if (user?.id !== lastUserId.current) {
+            clearCart();
+            lastUserId.current = user?.id;
+        }
+    }, [user?.id]);
 
     const addToCart = (product, quantity, restaurantId) => {
         setCart((prevCart) => {
