@@ -101,6 +101,8 @@ const Register = () => {
         setError('');
         setLoading(true);
 
+        let registrationResult;
+
         try {
             const userData = {
                 name,
@@ -130,16 +132,16 @@ const Register = () => {
                 };
             }
 
-            const result = await register(userData);
+            registrationResult = await register(userData);
 
-            if (result.success) {
+            if (registrationResult.success) {
                 if (role === 'RESTAURANT_OWNER') {
                     navigate('/admin');
                 } else {
                     navigate('/');
                 }
             } else {
-                setError(result.error || 'Erro ao criar conta');
+                setError(registrationResult.error || 'Erro ao criar conta');
             }
         } catch (err) {
             setError(err.message || 'Erro inesperado');
