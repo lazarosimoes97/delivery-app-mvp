@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PixPayment from './PixPayment';
+import CardPayment from './CardPayment';
 
 const PaymentModal = ({ isOpen, onClose, orderId, total }) => {
     const navigate = useNavigate();
@@ -44,21 +45,27 @@ const PaymentModal = ({ isOpen, onClose, orderId, total }) => {
                             </button>
 
                             <button
-                                disabled
-                                className="w-full flex items-center gap-4 p-4 border-2 border-gray-200 rounded-lg opacity-50 cursor-not-allowed"
+                                onClick={() => setPaymentMethod('card')}
+                                className="w-full flex items-center gap-4 p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all"
                             >
-                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                                    <span className="text-gray-600 font-bold text-lg">💳</span>
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                    <span className="text-green-600 font-bold text-lg">💳</span>
                                 </div>
                                 <div className="flex-1 text-left">
                                     <p className="font-medium text-gray-800">Cartão de Crédito</p>
-                                    <p className="text-sm text-gray-500">Em breve</p>
+                                    <p className="text-sm text-gray-500">Parcelamento disponível</p>
                                 </div>
                             </button>
                         </div>
                     </div>
                 ) : paymentMethod === 'pix' ? (
                     <PixPayment
+                        orderId={orderId}
+                        total={total}
+                        onSuccess={handlePaymentSuccess}
+                    />
+                ) : paymentMethod === 'card' ? (
+                    <CardPayment
                         orderId={orderId}
                         total={total}
                         onSuccess={handlePaymentSuccess}
