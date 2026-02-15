@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,28 +8,28 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      String   @default("CLIENT") // Role: CLIENT, RESTAURANT_OWNER
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  restaurants Restaurant[] // If user is an owner
+  id          String       @id @default(uuid())
+  name        String
+  email       String       @unique
+  password    String
+  role        String       @default("CLIENT")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   orders      Order[]
+  restaurants Restaurant[]
 }
 
 model Restaurant {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  imageUrl    String?
-  document    String?  // CPF ou CNPJ
-  type        String?  // Tipo de estabelecimento
-  category    String?  // Categoria principal
-  
-  // Address Details
+  id           String    @id @default(uuid())
+  name         String
+  description  String?
+  imageUrl     String?
+  ownerId      String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  category     String?
+  document     String?
+  type         String?
   zipCode      String?
   state        String?
   city         String?
@@ -43,54 +40,47 @@ model Restaurant {
   reference    String?
   latitude     Float?
   longitude    Float?
-
-  ownerId     String
-  owner       User     @relation(fields: [ownerId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  products Product[]
-  orders   Order[]
+  orders       Order[]
+  products     Product[]
+  owner        User      @relation(fields: [ownerId], references: [id])
 }
 
 model Product {
-  id           String     @id @default(uuid())
+  id           String      @id @default(uuid())
   name         String
   description  String?
   price        Float
-  category     String     @default("General")
+  category     String      @default("General")
   imageUrl     String?
   restaurantId String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  orderItems OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  orderItems   OrderItem[]
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id])
 }
 
 model Order {
   id            String      @id @default(uuid())
   userId        String
-  user          User        @relation(fields: [userId], references: [id])
   restaurantId  String
-  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id])
-  status        String      @default("PENDING") // OrderStatus: PENDING, PREPARING, DELIVERING, DELIVERED, CANCELED
+  status        String      @default("PENDING")
   total         Float
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   paymentId     String?
   paymentStatus String      @default("PENDING")
   paymentMethod String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-
-  items OrderItem[]
+  restaurant    Restaurant  @relation(fields: [restaurantId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+  items         OrderItem[]
 }
 
 model OrderItem {
   id        String  @id @default(uuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product   Product @relation(fields: [productId], references: [id])
   quantity  Int
-  price     Float // Price at the time of order
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }

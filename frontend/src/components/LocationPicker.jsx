@@ -75,6 +75,13 @@ const LocationPicker = ({ onLocationChange, initialPosition }) => {
         }
     }, []);
 
+    // Update internal state when parent props change (e.g. ZIP code search)
+    useEffect(() => {
+        if (initialPosition) {
+            setPosition(initialPosition);
+        }
+    }, [initialPosition]);
+
     const handlePositionChange = (newPos) => {
         setPosition(newPos);
         onLocationChange(newPos);
