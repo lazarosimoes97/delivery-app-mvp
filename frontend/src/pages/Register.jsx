@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Store, User, ChevronRight } from 'lucide-react';
+import { Store, User, ChevronRight, Search, MapPin } from 'lucide-react';
+import axios from 'axios';
+import LocationPicker from '../components/LocationPicker';
 
 const Register = () => {
     const [role, setRole] = useState('CLIENT'); // CLIENT or RESTAURANT_OWNER
@@ -19,7 +21,17 @@ const Register = () => {
     const [type, setType] = useState('Restaurante');
     const [category, setCategory] = useState('Geral');
     const [description, setDescription] = useState('');
-    const [address, setAddress] = useState('');
+
+    // Address Data
+    const [zipCode, setZipCode] = useState('');
+    const [state, setState] = useState('');
+    const [city, setCity] = useState('');
+    const [neighborhood, setNeighborhood] = useState('');
+    const [street, setStreet] = useState('');
+    const [number, setNumber] = useState('');
+    const [complement, setComplement] = useState('');
+    const [reference, setReference] = useState('');
+    const [location, setLocation] = useState({ lat: -23.550520, lng: -46.633308 }); // Default SP
 
     const [error, setError] = useState('');
     const { register } = useAuth();
@@ -29,6 +41,39 @@ const Register = () => {
         setRole(selectedRole);
         setStep(2);
         setError('');
+    };
+
+    const handleZipCodeBlur = async () => {
+        const cleanZip = zipCode.replace(/\D/g, '');
+        if (cleanZip.length === 8) {
+            try {
+                const response = await axios.get(`https://viacep.com.br/ws/${cleanZip}/json/`);
+                if (!response.data.erro) {
+                    setStreet(response.data.logradouro);
+                    setNeighborhood(response.data.bairro);
+                    setCity(response.data.localidade);
+                    setState(response.data.uf);
+
+                    // Tentar obter coordenadas do endereço via OpenStreetMap Nominatim (Opcional, mas ajuda a centralizar o mapa)
+                    fetchCoordinates(response.data.logradouro, response.data.localidade, response.data.uf);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar CEP", error);
+            }
+        }
+    };
+
+    const fetchCoordinates = async (logradouro, localidade, uf) => {
+        try {
+            const query = `${logradouro}, ${localidade}, ${uf}, Brazil`;
+            const response = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+            if (response.data && response.data.length > 0) {
+                const { lat, lon } = response.data[0];
+                setLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
+            }
+        } catch (error) {
+            console.error("Erro ao buscar coordenadas", error);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -51,7 +96,17 @@ const Register = () => {
                     type,
                     category,
                     description,
-                    address
+                    // Address Details
+                    zipCode,
+                    state,
+                    city,
+                    neighborhood,
+                    street,
+                    number,
+                    complement,
+                    reference,
+                    latitude: location.lat,
+                    longitude: location.lng
                 };
             }
 
@@ -175,82 +230,192 @@ const Register = () => {
 
                     {/* Seção de Dados do Restaurante (Apenas para donos) */}
                     {role === 'RESTAURANT_OWNER' && (
-                        <div className="animate-fade-in">
-                            <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 mt-8">Dados do Estabelecimento</h3>
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-medium mb-2">Nome do Estabelecimento</label>
+                        <div className="animate-fade-in space-y-6">
+                            {/* Dados Básicos */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 mt-8">Dados do Estabelecimento</h3>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Nome do Estabelecimento</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={restaurantName}
+                                            onChange={(e) => setRestaurantName(e.target.value)}
+                                            required
+                                            placeholder="Ex: Pizzaria do João"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">CPF / CNPJ</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={document}
+                                            onChange={(e) => setDocument(e.target.value)}
+                                            required
+                                            placeholder="000.000.000-00"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Tipo de Estabelecimento</label>
+                                        <select
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                            value={type}
+                                            onChange={(e) => setType(e.target.value)}
+                                        >
+                                            <option value="Restaurante">Restaurante</option>
+                                            <option value="Lanchonete">Lanchonete</option>
+                                            <option value="Mercado">Mercado</option>
+                                            <option value="Farmácia">Farmácia</option>
+                                            <option value="Outros">Outros</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Categoria Principal</label>
+                                        <select
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                                            value={category}
+                                            onChange={(e) => setCategory(e.target.value)}
+                                        >
+                                            <option value="Geral">Geral</option>
+                                            <option value="Pizza">Pizza</option>
+                                            <option value="Hambúrguer">Hambúrguer</option>
+                                            <option value="Japonesa">Japonesa</option>
+                                            <option value="Brasileira">Brasileira</option>
+                                            <option value="Italiana">Italiana</option>
+                                            <option value="Doces & Bolos">Doces & Bolos</option>
+                                            <option value="Açaí">Açaí</option>
+                                        </select>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Descrição</label>
+                                        <textarea
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            rows="2"
+                                            placeholder="Uma breve descrição do seu negócio..."
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Endereço e Localização */}
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2 flex items-center gap-2">
+                                    <MapPin size={20} />
+                                    Localização e Endereço
+                                </h3>
+
+                                <div className="grid md:grid-cols-4 gap-4 mb-4">
+                                    <div className="md:col-span-1">
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">CEP</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                value={zipCode}
+                                                onChange={(e) => setZipCode(e.target.value)}
+                                                onBlur={handleZipCodeBlur}
+                                                required
+                                                placeholder="00000-000"
+                                            />
+                                            <Search className="absolute right-3 top-3 text-gray-400 w-4 h-4" />
+                                        </div>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Cidade</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg bg-gray-50"
+                                            value={city}
+                                            onChange={(e) => setCity(e.target.value)}
+                                            required
+                                            readOnly // Preenchido pelo CEP
+                                        />
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Estado</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg bg-gray-50"
+                                            value={state}
+                                            onChange={(e) => setState(e.target.value)}
+                                            required
+                                            readOnly // Preenchido pelo CEP
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-4 gap-4 mb-4">
+                                    <div className="md:col-span-3">
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Rua / Logradouro</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={street}
+                                            onChange={(e) => setStreet(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Número</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={number}
+                                            onChange={(e) => setNumber(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                                    <div>
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Bairro</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={neighborhood}
+                                            onChange={(e) => setNeighborhood(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-gray-700 text-sm font-medium mb-2">Complemento</label>
+                                        <input
+                                            type="text"
+                                            className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            value={complement}
+                                            onChange={(e) => setComplement(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-gray-700 text-sm font-medium mb-2">Ponto de Referência</label>
                                     <input
                                         type="text"
                                         className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={restaurantName}
-                                        onChange={(e) => setRestaurantName(e.target.value)}
-                                        required
-                                        placeholder="Ex: Pizzaria do João"
+                                        value={reference}
+                                        onChange={(e) => setReference(e.target.value)}
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-medium mb-2">CPF / CNPJ</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={document}
-                                        onChange={(e) => setDocument(e.target.value)}
-                                        required
-                                        placeholder="000.000.000-00"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-medium mb-2">Tipo de Estabelecimento</label>
-                                    <select
-                                        className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                                        value={type}
-                                        onChange={(e) => setType(e.target.value)}
-                                    >
-                                        <option value="Restaurante">Restaurante</option>
-                                        <option value="Lanchonete">Lanchonete</option>
-                                        <option value="Mercado">Mercado</option>
-                                        <option value="Farmácia">Farmácia</option>
-                                        <option value="Outros">Outros</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-gray-700 text-sm font-medium mb-2">Categoria Principal</label>
-                                    <select
-                                        className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                                        value={category}
-                                        onChange={(e) => setCategory(e.target.value)}
-                                    >
-                                        <option value="Geral">Geral</option>
-                                        <option value="Pizza">Pizza</option>
-                                        <option value="Hambúrguer">Hambúrguer</option>
-                                        <option value="Japonesa">Japonesa</option>
-                                        <option value="Brasileira">Brasileira</option>
-                                        <option value="Italiana">Italiana</option>
-                                        <option value="Doces & Bolos">Doces & Bolos</option>
-                                        <option value="Açaí">Açaí</option>
-                                    </select>
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-gray-700 text-sm font-medium mb-2">Endereço Completo</label>
-                                    <input
-                                        type="text"
-                                        className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={address}
-                                        onChange={(e) => setAddress(e.target.value)}
-                                        required
-                                        placeholder="Rua, Número, Bairro, Cidade - UF"
-                                    />
-                                </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-gray-700 text-sm font-medium mb-2">Descrição</label>
-                                    <textarea
-                                        className="w-full p-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        rows="3"
-                                        placeholder="Uma breve descrição do seu negócio..."
-                                    />
+
+                                <div className="mb-4">
+                                    <label className="block text-gray-700 text-sm font-medium mb-2">
+                                        Confira a localização no mapa (Arraste o marcador se necessário)
+                                    </label>
+                                    <div className="h-[300px] w-full rounded-lg overflow-hidden border">
+                                        <LocationPicker
+                                            onLocationChange={setLocation}
+                                            initialPosition={location}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1 text-center">
+                                        Lat: {location.lat.toFixed(6)}, Lng: {location.lng.toFixed(6)}
+                                    </p>
                                 </div>
                             </div>
                         </div>

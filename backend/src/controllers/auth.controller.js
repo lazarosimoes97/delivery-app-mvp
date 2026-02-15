@@ -33,7 +33,19 @@ exports.register = async (req, res) => {
                         type: restaurant.type,
                         category: restaurant.category,
                         description: restaurant.description,
-                        address: restaurant.address,
+
+                        // Address Details
+                        zipCode: restaurant.zipCode,
+                        state: restaurant.state,
+                        city: restaurant.city,
+                        neighborhood: restaurant.neighborhood,
+                        street: restaurant.street,
+                        number: restaurant.number,
+                        complement: restaurant.complement,
+                        reference: restaurant.reference,
+                        latitude: parseFloat(restaurant.latitude),
+                        longitude: parseFloat(restaurant.longitude),
+
                         ownerId: user.id
                     }
                 });

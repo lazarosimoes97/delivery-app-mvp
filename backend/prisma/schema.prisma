@@ -27,11 +27,23 @@ model Restaurant {
   id          String   @id @default(uuid())
   name        String
   description String?
-  address     String
   imageUrl    String?
   document    String?  // CPF ou CNPJ
   type        String?  // Tipo de estabelecimento
   category    String?  // Categoria principal
+  
+  // Address Details
+  zipCode      String?
+  state        String?
+  city         String?
+  neighborhood String?
+  street       String?
+  number       String?
+  complement   String?
+  reference    String?
+  latitude     Float?
+  longitude    Float?
+
   ownerId     String
   owner       User     @relation(fields: [ownerId], references: [id])
   createdAt   DateTime @default(now())
