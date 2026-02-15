@@ -127,3 +127,6 @@ main()
     .finally(async () => {
         await prisma.$disconnect();
     });
+
+// Export for use in HTTP endpoint
+module.exports = main;
