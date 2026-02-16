@@ -13,6 +13,7 @@ const RestaurantList = () => {
     const [error, setError] = useState('');
     const { location, address } = useLocation();
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     useEffect(() => {
         if (!location) {
@@ -72,42 +73,62 @@ const RestaurantList = () => {
                 </div>
             </div>
 
-            <CategoryCarousel />
+            <CategoryCarousel
+                activeCategory={selectedCategory}
+                onCategoryChange={(category) => setSelectedCategory(prev => prev === category ? null : category)}
+            />
+
+            {(selectedCategory) && (
+                <div className="mb-6 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span className="text-gray-500 text-sm">Mostrando:</span>
+                        <span className="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{selectedCategory}</span>
+                    </div>
+                    <button
+                        onClick={() => setSelectedCategory(null)}
+                        className="text-xs text-gray-400 hover:text-gray-600 font-medium"
+                    >
+                        Limpar Filtro
+                    </button>
+                </div>
+            )}
 
             {viewMode === 'list' ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-fade-in">
-                    {restaurants.map((restaurant) => (
-                        <Link to={`/restaurant/${restaurant.id}`} key={restaurant.id} className="block group">
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-                                <div className="relative h-40 md:h-48 overflow-hidden">
-                                    <img
-                                        src={restaurant.imageUrl || 'https://via.placeholder.com/400x200'}
-                                        alt={restaurant.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                    />
-                                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 md:hidden">
-                                        <h3 className="text-white font-bold text-lg leading-tight">{restaurant.name}</h3>
+                    {restaurants
+                        .filter(r => !selectedCategory || r.category === selectedCategory)
+                        .map((restaurant) => (
+                            <Link to={`/restaurant/${restaurant.id}`} key={restaurant.id} className="block group">
+                                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+                                    <div className="relative h-40 md:h-48 overflow-hidden">
+                                        <img
+                                            src={restaurant.imageUrl || 'https://via.placeholder.com/400x200'}
+                                            alt={restaurant.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                        />
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 md:hidden">
+                                            <h3 className="text-white font-bold text-lg leading-tight">{restaurant.name}</h3>
+                                        </div>
+                                    </div>
+                                    <div className="p-3 md:p-4">
+                                        <h3 className="hidden md:block text-lg font-semibold mb-1">{restaurant.name}</h3>
+                                        <p className="text-gray-600 text-xs md:text-sm mb-2 line-clamp-2">{restaurant.description}</p>
+                                        <div className="flex items-center text-xs md:text-sm text-gray-500">
+                                            <MapPin className="w-3 h-3 mr-1" />
+                                            <span className="truncate">
+                                                {restaurant.street
+                                                    ? `${restaurant.street}, ${restaurant.number} - ${restaurant.city}`
+                                                    : restaurant.address}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="p-3 md:p-4">
-                                    <h3 className="hidden md:block text-lg font-semibold mb-1">{restaurant.name}</h3>
-                                    <p className="text-gray-600 text-xs md:text-sm mb-2 line-clamp-2">{restaurant.description}</p>
-                                    <div className="flex items-center text-xs md:text-sm text-gray-500">
-                                        <MapPin className="w-3 h-3 mr-1" />
-                                        <span className="truncate">
-                                            {restaurant.street
-                                                ? `${restaurant.street}, ${restaurant.number} - ${restaurant.city}`
-                                                : restaurant.address}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
+                            </Link>
+                        ))}
                 </div>
             ) : (
                 <div className="animate-fade-in block h-[500px]">
-                    <RestaurantMap restaurants={restaurants} />
+                    <RestaurantMap restaurants={restaurants.filter(r => !selectedCategory || r.category === selectedCategory)} />
                 </div>
             )}
 

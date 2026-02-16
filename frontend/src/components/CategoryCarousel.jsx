@@ -25,7 +25,7 @@ const categories = [
     { id: 9, name: 'Carnes', icon: Beef, color: 'bg-red-100 text-red-800' },
 ];
 
-const CategoryCarousel = () => {
+const CategoryCarousel = ({ activeCategory, onCategoryChange }) => {
     const scrollRef = useRef(null);
 
     const scroll = (direction) => {
@@ -54,17 +54,26 @@ const CategoryCarousel = () => {
                 className="flex gap-4 overflow-x-auto scrollbar-hide py-2 px-1 scroll-smooth"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-                {categories.map((category) => (
-                    <div
-                        key={category.id}
-                        className="flex flex-col items-center gap-2 min-w-[80px] cursor-pointer hover:scale-105 transition-transform"
-                    >
-                        <div className={`w-16 h-16 rounded-xl flex items-center justify-center shadow-sm ${category.color}`}>
-                            <category.icon className="w-8 h-8" />
+                {categories.map((category) => {
+                    const isActive = activeCategory === category.name;
+                    return (
+                        <div
+                            key={category.name}
+                            onClick={() => onCategoryChange(category.name)}
+                            className="flex flex-col items-center gap-2 min-w-[80px] cursor-pointer hover:scale-105 transition-transform"
+                        >
+                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 ${isActive
+                                    ? 'bg-red-600 text-white shadow-lg shadow-red-200 ring-4 ring-red-50'
+                                    : category.color + ' group-hover:shadow-md'
+                                }`}>
+                                <category.icon className={`w-8 h-8 ${isActive ? 'scale-110' : ''}`} />
+                            </div>
+                            <span className={`text-xs font-bold transition-colors ${isActive ? 'text-red-600' : 'text-gray-500'}`}>
+                                {category.name}
+                            </span>
                         </div>
-                        <span className="text-xs font-medium text-gray-700">{category.name}</span>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <button
