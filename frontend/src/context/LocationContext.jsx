@@ -9,9 +9,9 @@ export const LocationProvider = ({ children }) => {
     const [address, setAddress] = useState(null);
 
     // Initial load from local storage if needed, or just kept in memory
-    // For MVP, we'll keep it in memory or persist to sessionStorage to avoid stale location issues
+    // For MVP, we'll keep it in memory or persist to localStorage to avoid stale location issues
     useEffect(() => {
-        const savedLocation = sessionStorage.getItem('userLocation');
+        const savedLocation = localStorage.getItem('userLocation');
         if (savedLocation) {
             const parsed = JSON.parse(savedLocation);
             // Migrar valores antigos em inglês para português
@@ -24,9 +24,9 @@ export const LocationProvider = ({ children }) => {
             }
             setLocation(parsed.coords);
             setAddress(migratedAddress);
-            // Atualizar o sessionStorage com o valor traduzido
+            // Atualizar o localStorage com o valor traduzido
             if (migratedAddress !== parsed.address) {
-                sessionStorage.setItem('userLocation', JSON.stringify({ coords: parsed.coords, address: migratedAddress }));
+                localStorage.setItem('userLocation', JSON.stringify({ coords: parsed.coords, address: migratedAddress }));
             }
         }
     }, []);
@@ -34,7 +34,7 @@ export const LocationProvider = ({ children }) => {
     const updateLocation = (coords, addr = 'Localização Atual') => {
         setLocation(coords);
         setAddress(addr);
-        sessionStorage.setItem('userLocation', JSON.stringify({ coords, address: addr }));
+        localStorage.setItem('userLocation', JSON.stringify({ coords, address: addr }));
     };
 
     return (
