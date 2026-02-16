@@ -3,6 +3,7 @@ services:
   - type: web
     name: delivery-app-backend
     env: node
+    rootDir: backend
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
@@ -32,6 +33,20 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
+
+  # Frontend Static Site
+  - type: static
+    name: delivery-app-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: delivery-app-backend
+          property: host
 
 databases:
   # PostgreSQL Database
