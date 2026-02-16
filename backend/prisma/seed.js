@@ -55,7 +55,7 @@ async function main() {
                 { name: 'Feijoada Completa', price: 35.00, desc: 'Acompanha arroz, couve e farofa.', img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=500&q=80' },
                 { name: 'Filé de Frango Grelhado', price: 24.90, desc: 'Prato comercial bem servido.', img: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=500&q=80' },
                 { name: 'Parmegiana de Carne', price: 42.00, desc: 'Serve até duas pessoas.', img: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&q=80' },
-                { name: 'Pudim de Leite', price: 8.00, desc: 'Sobremesa clássica da casa.', img: 'https://images.unsplash.com/photo-1590473031965-14261d718b91?w=500&q=80' },
+                { name: 'Pudim de Leite', price: 8.00, desc: 'Sobremesa clássica da casa.', img: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=500&q=80' },
                 { name: 'Suco de Laranja 500ml', price: 10.00, desc: 'Fruta espremida na hora.', img: 'https://images.unsplash.com/photo-1613478223719-2ab802602423?w=500&q=80' }
             ]
         },
