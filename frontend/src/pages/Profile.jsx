@@ -2,14 +2,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
     ChevronLeft,
-    MessageSquare,
+    User,
     FileText,
-    Ticket,
     Heart,
     CreditCard,
     Star,
     HelpCircle,
-    Settings,
     ShieldCheck,
     LogOut,
     ChevronRight
