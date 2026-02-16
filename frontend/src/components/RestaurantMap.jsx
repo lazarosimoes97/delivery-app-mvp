@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
+import { useLocation } from '../context/LocationContext';
 
 // Fix for default marker icon in React Leaflet
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -18,11 +19,17 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 const RestaurantMap = ({ restaurants }) => {
-    // Center map on Sao Paulo by default or the first restaurant
-    const defaultCenter = [-23.550520, -46.633308];
-    const center = restaurants.length > 0 && restaurants[0].latitude
-        ? [restaurants[0].latitude, restaurants[0].longitude]
-        : defaultCenter;
+    const { location: userLocation } = useLocation();
+
+    // Center map on Charqueada by default
+    const charqueadaCoords = [-22.50972, -47.77806];
+
+    // Priority: 1. User Location, 2. First restaurant, 3. Charqueada
+    const center = userLocation
+        ? [userLocation.lat, userLocation.lng]
+        : (restaurants.length > 0 && restaurants[0].latitude
+            ? [restaurants[0].latitude, restaurants[0].longitude]
+            : charqueadaCoords);
 
     return (
         <div className="h-[500px] w-full rounded-xl overflow-hidden border border-gray-200 shadow-sm z-0 relative">
