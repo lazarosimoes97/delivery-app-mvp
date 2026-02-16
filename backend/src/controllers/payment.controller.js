@@ -8,76 +8,149 @@ const client = new MercadoPagoConfig({
 
 const paymentClient = new Payment(client);
 
+// Helper to get MP client for a specific restaurant
+const getRestaurantMPClient = (accessToken) => {
+    const restaurantConfig = new MercadoPagoConfig({ accessToken });
+    return new Payment(restaurantConfig);
+};
+
+// Generate OAuth URL for restaurants
+exports.getOAuthUrl = async (req, res) => {
+    try {
+        const { restaurantId } = req.params;
+        const appId = process.env.MERCADOPAGO_APP_ID;
+        const redirectUri = encodeURIComponent(`${process.env.BACKEND_URL}/api/payments/oauth/callback`);
+
+        // State includes restaurantId to verify later
+        const state = restaurantId;
+
+        const url = `https://auth.mercadopago.com.br/authorization?client_id=${appId}&response_type=code&platform_id=mp&state=${state}&redirect_uri=${redirectUri}`;
+
+        res.json({ url });
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao gerar URL do Mercado Pago' });
+    }
+};
+
+// Handle OAuth Callback
+exports.handleOAuthCallback = async (req, res) => {
+    const { code, state: restaurantId } = req.query;
+
+    if (!code) {
+        return res.status(400).send('Código de autorização ausente');
+    }
+
+    try {
+        const response = await fetch('https://api.mercadopago.com/oauth/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`
+            },
+            body: JSON.stringify({
+                client_secret: process.env.MERCADOPAGO_CLIENT_SECRET,
+                client_id: process.env.MERCADOPAGO_APP_ID,
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: `${process.env.BACKEND_URL}/api/payments/oauth/callback`
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.access_token) {
+            // Save to restaurant
+            await prisma.restaurant.update({
+                where: { id: restaurantId },
+                data: {
+                    mpAccessToken: data.access_token,
+                    mpUserId: data.user_id.toString()
+                }
+            });
+
+            // Redirecionar de volta para o admin com sucesso
+            res.redirect(`${process.env.FRONTEND_URL}/admin?success=mp_connected`);
+        } else {
+            console.error('MP OAuth Error:', data);
+            res.redirect(`${process.env.FRONTEND_URL}/admin?mp_status=error`);
+        }
+    } catch (error) {
+        console.error('OAuth Callback Error:', error);
+        res.status(500).send('Erro ao processar autorização');
+    }
+};
+
 // Create PIX payment
 exports.createPixPayment = async (req, res) => {
     try {
         const { orderId } = req.body;
 
-        // Get order details
         const order = await prisma.order.findUnique({
             where: { id: orderId },
             include: {
-                items: {
-                    include: {
-                        product: true
-                    }
-                },
+                items: { include: { product: true } },
                 restaurant: true,
                 user: true
             }
         });
 
         if (!order) {
-            return res.status(404).json({ error: 'Pedido não encontrado' });
+            return res.status(404).json({ message: 'Pedido não encontrado' });
         }
 
-        // Create PIX payment
-        const paymentData = {
-            transaction_amount: order.total,
-            description: `Pedido ${order.restaurant.name}`,
+        // Se o restaurante tiver conta MP conectada, usamos o token dele
+        const restaurantClient = order.restaurant.mpAccessToken ? getRestaurantMPClient(order.restaurant.mpAccessToken) : null;
+        const clientToUse = restaurantClient || paymentClient;
+
+        // Se estiver usando a conta do restaurante, podemos cobrar uma comissão (application_fee)
+        // Nota: application_fee requer que a App ID que gerou o token seja a mesma do paymentClient
+        let paymentData = {
+            transaction_amount: Number(order.total),
+            description: `Pedido #${order.id.slice(0, 8)} - ${order.restaurant.name}`,
             payment_method_id: 'pix',
             payer: {
                 email: order.user.email,
                 first_name: order.user.name.split(' ')[0],
-                last_name: order.user.name.split(' ').slice(1).join(' ') || order.user.name.split(' ')[0]
+                last_name: order.user.name.split(' ').slice(1).join(' ') || 'User',
             },
             notification_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
-            external_reference: orderId
+            external_reference: orderId,
         };
 
-        const payment = await paymentClient.create({ body: paymentData });
+        // Adicionar taxa da plataforma (10%) se o restaurante estiver conectado
+        if (order.restaurant.mpAccessToken) {
+            const fee = Number((order.total * 0.10).toFixed(2));
+            paymentData.application_fee = fee;
+        }
 
-        // Update order with payment ID
+        const payment = await clientToUse.create({ body: paymentData });
+
         await prisma.order.update({
             where: { id: orderId },
             data: {
-                paymentId: payment.id.toString(),
-                paymentStatus: 'PENDING',
-                paymentMethod: 'pix'
+                status: 'PENDING',
+                paymentId: String(payment.id),
+                mpQrCode: payment.point_of_interaction.transaction_data.qr_code,
+                mpQrCodeBase64: payment.point_of_interaction.transaction_data.qr_code_base64
             }
         });
 
-        // Return QR Code data
         res.json({
-            paymentId: payment.id,
-            status: payment.status,
-            qrCode: payment.point_of_interaction.transaction_data.qr_code,
-            qrCodeBase64: payment.point_of_interaction.transaction_data.qr_code_base64,
-            ticketUrl: payment.point_of_interaction.transaction_data.ticket_url
+            id: payment.id,
+            qr_code: payment.point_of_interaction.transaction_data.qr_code,
+            qr_code_base64: payment.point_of_interaction.transaction_data.qr_code_base64
         });
-
     } catch (error) {
-        console.error('Error creating PIX payment:', error);
-        res.status(500).json({ error: 'Erro ao criar pagamento PIX', details: error.message });
+        console.error('Erro ao criar pagamento PIX:', error);
+        res.status(500).json({ message: 'Erro ao processar pagamento PIX' });
     }
 };
 
 // Create card payment
 exports.createCardPayment = async (req, res) => {
     try {
-        const { orderId, token, installments, paymentMethodId } = req.body;
+        const { orderId, token, installments, paymentMethodId, payerEmail } = req.body;
 
-        // Get order details
         const order = await prisma.order.findUnique({
             where: { id: orderId },
             include: {
@@ -87,47 +160,50 @@ exports.createCardPayment = async (req, res) => {
         });
 
         if (!order) {
-            return res.status(404).json({ error: 'Pedido não encontrado' });
+            return res.status(404).json({ message: 'Pedido não encontrado' });
         }
 
-        // Create card payment
-        const paymentData = {
-            transaction_amount: order.total,
+        // Se o restaurante tiver conta MP conectada, usamos o token dele
+        const restaurantClient = order.restaurant.mpAccessToken ? getRestaurantMPClient(order.restaurant.mpAccessToken) : null;
+        const clientToUse = restaurantClient || paymentClient;
+
+        let paymentData = {
+            transaction_amount: Number(order.total),
             token,
-            description: `Pedido ${order.restaurant.name}`,
-            installments: installments || 1,
+            description: `Pedido #${order.id.slice(0, 8)} - ${order.restaurant.name}`,
+            installments: Number(installments),
             payment_method_id: paymentMethodId,
             payer: {
-                email: order.user.email,
-                first_name: order.user.name.split(' ')[0],
-                last_name: order.user.name.split(' ').slice(1).join(' ') || order.user.name.split(' ')[0]
+                email: payerEmail || order.user.email,
             },
             notification_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
-            external_reference: orderId
+            external_reference: orderId,
         };
 
-        const payment = await paymentClient.create({ body: paymentData });
+        // Adicionar taxa da plataforma (10%) se o restaurante estiver conectado
+        if (order.restaurant.mpAccessToken) {
+            const fee = Number((order.total * 0.10).toFixed(2));
+            paymentData.application_fee = fee;
+        }
 
-        // Update order with payment info
+        const payment = await clientToUse.create({ body: paymentData });
+
         await prisma.order.update({
             where: { id: orderId },
             data: {
-                paymentId: payment.id.toString(),
-                paymentStatus: payment.status === 'approved' ? 'APPROVED' : 'PENDING',
-                paymentMethod: paymentMethodId,
-                status: payment.status === 'approved' ? 'PREPARING' : 'PENDING'
+                status: payment.status === 'approved' ? 'PREPARING' : 'PENDING',
+                paymentId: String(payment.id),
             }
         });
 
         res.json({
-            paymentId: payment.id,
+            id: payment.id,
             status: payment.status,
-            statusDetail: payment.status_detail
+            status_detail: payment.status_detail
         });
-
     } catch (error) {
-        console.error('Error creating card payment:', error);
-        res.status(500).json({ error: 'Erro ao processar pagamento', details: error.message });
+        console.error('Erro ao processar pagamento com cartão:', error);
+        res.status(500).json({ message: 'Erro ao processar pagamento com cartão' });
     }
 };
 

@@ -12,6 +12,12 @@ router.post('/card', authMiddleware, paymentController.createCardPayment);
 // Webhook for payment notifications
 router.post('/webhook', paymentController.webhook);
 
+// Generate OAuth URL
+router.get('/oauth/:restaurantId', authMiddleware, paymentController.getOAuthUrl);
+
+// OAuth Callback (Public, Mercado Pago redirects here)
+router.get('/oauth/callback', paymentController.handleOAuthCallback);
+
 // Get payment status
 router.get('/:orderId/status', authMiddleware, paymentController.getPaymentStatus);
 

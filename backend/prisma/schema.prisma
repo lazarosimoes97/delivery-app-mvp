@@ -40,6 +40,8 @@ model Restaurant {
   reference    String?
   latitude     Float?
   longitude    Float?
+  mpUserId     String?
+  mpAccessToken String?
   orders       Order[]
   products     Product[]
   owner        User      @relation(fields: [ownerId], references: [id])
