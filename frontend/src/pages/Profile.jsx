@@ -5,9 +5,6 @@ import {
     User,
     FileText,
     Heart,
-    CreditCard,
-    Star,
-    HelpCircle,
     ShieldCheck,
     LogOut,
     ChevronRight
@@ -27,9 +24,6 @@ const Profile = () => {
         { icon: ShieldCheck, label: 'Segurança', path: '/profile/security' },
         { icon: Heart, label: 'Favoritos', path: '/favorites' },
         { icon: FileText, label: 'Meus Pedidos', path: '/orders' },
-        { icon: CreditCard, label: 'Pagamento', path: '#' },
-        { icon: Star, label: 'Fidelidade', path: '#' },
-        { icon: HelpCircle, label: 'Ajuda', path: '#' },
     ];
 
     return (
