@@ -202,6 +202,8 @@ const RestaurantMenu = () => {
 
 const AddToOrderButton = ({ product, restaurantId, addToCart }) => {
     const [added, setAdded] = useState(false);
+    const { user } = useAuth();
+    const navigate = useNavigate();
 
     const handleClick = (e) => {
         e.stopPropagation();
