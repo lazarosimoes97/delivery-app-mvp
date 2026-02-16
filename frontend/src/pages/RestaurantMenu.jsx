@@ -207,21 +207,31 @@ const AddToOrderButton = ({ product, restaurantId, addToCart }) => {
 
     const handleClick = (e) => {
         e.stopPropagation();
+
+        console.log('Botão + clicado:', { productId: product.id, restaurantId, userLoggedIn: !!user });
+
         if (!user) {
             if (window.confirm('Você precisa estar logado para adicionar itens ao carrinho. Deseja fazer login agora?')) {
                 navigate('/login', { state: { from: window.location.pathname } });
             }
             return;
         }
-        addToCart(product, 1, restaurantId);
-        setAdded(true);
-        setTimeout(() => setAdded(false), 2000);
+
+        try {
+            addToCart(product, 1, restaurantId);
+            setAdded(true);
+            setTimeout(() => setAdded(false), 2000);
+        } catch (error) {
+            console.error('Erro ao adicionar ao carrinho:', error);
+            alert('Erro ao adicionar item ao carrinho. Tente novamente.');
+        }
     };
 
     return (
         <button
             onClick={handleClick}
-            className={`absolute bottom-[-10px] right-[-5px] shadow-md p-1.5 rounded-full border border-gray-100 transition-all duration-300 flex items-center justify-center min-w-[32px] h-[32px] ${added ? 'bg-green-500 text-white scale-110' : 'bg-white text-red-600'
+            type="button"
+            className={`absolute bottom-[-10px] right-[-5px] shadow-md p-1.5 rounded-full border border-gray-100 transition-all duration-300 flex items-center justify-center min-w-[32px] h-[32px] z-10 ${added ? 'bg-green-500 text-white scale-110' : 'bg-white text-red-600'
                 }`}
         >
             {added ? (

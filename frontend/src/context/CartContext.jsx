@@ -8,8 +8,13 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
     const { user } = useAuth();
     const [cart, setCart] = useState(() => {
-        const storedCart = localStorage.getItem('cart');
-        return storedCart ? JSON.parse(storedCart) : { restaurantId: null, items: [] };
+        try {
+            const storedCart = localStorage.getItem('cart');
+            return storedCart ? JSON.parse(storedCart) : { restaurantId: null, items: [] };
+        } catch (error) {
+            console.error('Error parsing cart:', error);
+            return { restaurantId: null, items: [] };
+        }
     });
 
     const lastUserId = useRef(user?.id);
@@ -21,26 +26,33 @@ export const CartProvider = ({ children }) => {
     // Limpar carrinho se o usuário mudar (login/logout)
     useEffect(() => {
         if (user?.id !== lastUserId.current) {
-            clearCart();
+            setCart({ restaurantId: null, items: [] });
             lastUserId.current = user?.id;
         }
     }, [user?.id]);
 
     const addToCart = (product, quantity, restaurantId) => {
-        setCart((prevCart) => {
-            // If adding from a different restaurant, clear cart first (or ask user, but MVP: overwrite)
-            let newItems = [...prevCart.items];
-            let currentRestaurantId = prevCart.restaurantId;
-
-            if (currentRestaurantId && currentRestaurantId !== restaurantId) {
-                if (!confirm("Deseja iniciar um novo carrinho? Adicionar itens de um restaurante diferente limpará seu carrinho atual.")) {
-                    return prevCart;
-                }
-                newItems = [];
-                currentRestaurantId = restaurantId;
-            } else if (!currentRestaurantId) {
-                currentRestaurantId = restaurantId;
+        // Verificar se é de um restaurante diferente antes de entrar no setCart
+        if (cart.restaurantId && cart.restaurantId !== restaurantId) {
+            if (!window.confirm("Deseja iniciar um novo carrinho? Adicionar itens de um restaurante diferente limpará seu carrinho atual.")) {
+                return;
             }
+            // Iniciar novo carrinho
+            setCart({
+                restaurantId,
+                items: [{
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity
+                }]
+            });
+            return;
+        }
+
+        setCart((prevCart) => {
+            const currentRestaurantId = restaurantId;
+            const newItems = [...prevCart.items];
 
             const existingItemIndex = newItems.findIndex((item) => item.productId === product.id);
             if (existingItemIndex > -1) {
