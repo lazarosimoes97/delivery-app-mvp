@@ -37,12 +37,12 @@ async function main() {
             name: 'Pizza da Praça',
             category: 'Pizza',
             description: 'Pizzas assadas no forno a lenha com ingredientes selecionados.',
-            image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800&q=80',
+            image: 'https://images.unsplash.com/photo-1590947132387-155cc02f3212?w=800&q=80',
             products: [
-                { name: 'Calabresa Família', price: 45.00, desc: 'Molho, mussarela, calabresa e cebola.', img: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=500&q=80' },
-                { name: 'Marguerita Média', price: 38.00, desc: 'Mussarela, tomate e manjericão fresco.', img: 'https://images.unsplash.com/photo-1574071318508-1cdbad80ad38?w=500&q=80' },
-                { name: 'Frango com Catupiry', price: 48.00, desc: 'O clássico preferido de todos.', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&q=80' },
-                { name: 'Brotinho Chocolate', price: 25.00, desc: 'Pizza doce com chocolate ao leite.', img: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500&q=80' },
+                { name: 'Calabresa Família', price: 45.00, desc: 'Molho, mussarela, calabresa e cebola.', img: 'https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?w=500&q=80' },
+                { name: 'Marguerita Média', price: 38.00, desc: 'Mussarela, tomate e manjericão fresco.', img: 'https://images.unsplash.com/photo-1573821663912-5699037ea012?w=500&q=80' },
+                { name: 'Frango com Catupiry', price: 48.00, desc: 'O clássico preferido de todos.', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&q=80' }, // Reusando um estável
+                { name: 'Brotinho Chocolate', price: 25.00, desc: 'Pizza doce com chocolate ao leite.', img: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&q=80' },
                 { name: 'Guaraná Antártica 2L', price: 12.00, desc: 'Tamanho família.', img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&q=80' }
             ]
         },
