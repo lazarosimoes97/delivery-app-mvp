@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { ShoppingCart, User, LogOut, ChevronDown, Store, Package, Settings } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
