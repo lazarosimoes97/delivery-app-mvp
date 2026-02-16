@@ -15,6 +15,7 @@ import EditProfile from './pages/EditProfile';
 import Security from './pages/Security';
 import Favorites from './pages/Favorites';
 import BottomNav from './components/BottomNav';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import { LocationProvider } from './context/LocationContext';
 import { useEffect } from 'react';
@@ -47,13 +48,15 @@ function App() {
                   <Route path="/register" element={<Register />} />
                   <Route path="/restaurant/:id" element={<RestaurantMenu />} />
                   <Route path="/cart" element={<Cart />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/admin" element={<RestaurantAdmin />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/profile/edit" element={<EditProfile />} />
-                  <Route path="/profile/security" element={<Security />} />
-                  <Route path="/favorites" element={<Favorites />} />
                   <Route path="/search" element={<Search />} />
+
+                  {/* Private Routes */}
+                  <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+                  <Route path="/admin" element={<ProtectedRoute><RestaurantAdmin /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                  <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+                  <Route path="/profile/security" element={<ProtectedRoute><Security /></ProtectedRoute>} />
+                  <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
                 </Routes>
               </div>
               <BottomNav />

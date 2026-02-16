@@ -205,6 +205,12 @@ const AddToOrderButton = ({ product, restaurantId, addToCart }) => {
 
     const handleClick = (e) => {
         e.stopPropagation();
+        if (!user) {
+            if (window.confirm('Você precisa estar logado para adicionar itens ao carrinho. Deseja fazer login agora?')) {
+                navigate('/login', { state: { from: window.location.pathname } });
+            }
+            return;
+        }
         addToCart(product, 1, restaurantId);
         setAdded(true);
         setTimeout(() => setAdded(false), 2000);

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { MapPin } from 'lucide-react';
 import { useLocation } from '../context/LocationContext';
+import { useAuth } from '../context/AuthContext';
 import LocationModal from '../components/LocationModal';
 import CategoryCarousel from '../components/CategoryCarousel';
 import RestaurantMap from '../components/RestaurantMap';
@@ -12,14 +13,15 @@ const RestaurantList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const { location, address } = useLocation();
+    const { user } = useAuth();
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     useEffect(() => {
-        if (!location) {
+        if (!location && user) {
             setIsLocationModalOpen(true);
         }
-    }, [location]);
+    }, [location, user]);
 
     useEffect(() => {
         const fetchRestaurants = async () => {
