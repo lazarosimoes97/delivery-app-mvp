@@ -19,7 +19,8 @@ exports.getOAuthUrl = async (req, res) => {
     try {
         const { restaurantId } = req.params;
         const appId = process.env.MERCADOPAGO_APP_ID;
-        const redirectUri = encodeURIComponent(`${process.env.BACKEND_URL}/api/payments/oauth/callback`);
+        const backendUrl = process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 3000}`;
+        const redirectUri = encodeURIComponent(`${backendUrl}/api/payments/oauth/callback`);
 
         // State includes restaurantId to verify later
         const state = restaurantId;
@@ -52,7 +53,7 @@ exports.handleOAuthCallback = async (req, res) => {
                 client_id: process.env.MERCADOPAGO_APP_ID,
                 grant_type: 'authorization_code',
                 code: code,
-                redirect_uri: `${process.env.BACKEND_URL}/api/payments/oauth/callback`
+                redirect_uri: `${process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL}/api/payments/oauth/callback`
             })
         });
 
@@ -113,7 +114,7 @@ exports.createPixPayment = async (req, res) => {
                 first_name: order.user.name.split(' ')[0],
                 last_name: order.user.name.split(' ').slice(1).join(' ') || 'User',
             },
-            notification_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
+            notification_url: `${process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL}/api/payments/webhook`,
             external_reference: orderId,
         };
 
@@ -176,7 +177,7 @@ exports.createCardPayment = async (req, res) => {
             payer: {
                 email: payerEmail || order.user.email,
             },
-            notification_url: `${process.env.BACKEND_URL}/api/payments/webhook`,
+            notification_url: `${process.env.BACKEND_URL || process.env.RENDER_EXTERNAL_URL}/api/payments/webhook`,
             external_reference: orderId,
         };
 

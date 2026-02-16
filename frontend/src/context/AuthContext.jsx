@@ -10,7 +10,13 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     // Configure axios base URL from environment variable
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    let API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+    // If it's a render host (no protocol), add https and /api
+    if (API_URL && !API_URL.startsWith('http')) {
+        API_URL = `https://${API_URL}.onrender.com/api`;
+    }
+
     axios.defaults.baseURL = API_URL;
 
     useEffect(() => {

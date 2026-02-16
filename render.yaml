@@ -47,6 +47,7 @@ services:
           type: web
           name: delivery-app-backend
           property: host
+        # Note: In the frontend, we'll prefix with https:// if it looks like a hostname.
 
 databases:
   # PostgreSQL Database
