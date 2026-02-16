@@ -80,9 +80,9 @@ async function main() {
             products: [
                 { name: 'Cesta de Pães', price: 15.00, desc: 'Pão francês, integral e queijo.', img: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=500&q=80' },
                 { name: 'Bolo de Cenoura G', price: 25.00, desc: 'Com muita cobertura de chocolate.', img: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&q=80' },
-                { name: 'Cappuccino Especial', price: 9.50, desc: 'Com borda de Nutella.', img: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=500&q=80' },
+                { name: 'Cappuccino Especial', price: 9.50, desc: 'Com borda de Nutella.', img: 'https://images.unsplash.com/photo-1541167760496-162955ed8a9f?w=500&q=80' }, // Testando link padrão mais seguro
                 { name: 'Coxinha de Frango', price: 6.00, desc: 'A melhor da cidade.', img: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=500&q=80' },
-                { name: 'Pão de Queijo Copo', price: 8.00, desc: 'Porção com 10 unidades.', img: 'https://images.unsplash.com/photo-1598103442097-8b74302b452a?w=500&q=80' }
+                { name: 'Pão de Queijo Copo', price: 8.00, desc: 'Porção com 10 unidades.', img: 'https://images.unsplash.com/photo-1601362840469-51e4d8d59085?w=500&q=80' }
             ]
         }
     ];
