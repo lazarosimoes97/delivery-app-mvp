@@ -101,7 +101,7 @@ const RestaurantAdmin = () => {
         }
     };
 
-    const handleImageUpload = async (e) => {
+    const handleImageUpload = async (e, mode = 'new') => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -113,7 +113,12 @@ const RestaurantAdmin = () => {
             const res = await axios.post('/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            setNewProduct(prev => ({ ...prev, imageUrl: res.data.url }));
+
+            if (mode === 'new') {
+                setNewProduct(prev => ({ ...prev, imageUrl: res.data.url }));
+            } else {
+                setEditProductForm(prev => ({ ...prev, imageUrl: res.data.url }));
+            }
         } catch (error) {
             console.error('Erro no upload:', error);
             alert('Falha ao subir imagem. Verifique as chaves do Cloudinary.');
@@ -479,10 +484,10 @@ const RestaurantAdmin = () => {
                                             <div className="font-mono text-xs text-gray-800">#{order.id.slice(0, 8)}</div>
                                         </div>
                                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${order.status === 'PENDING' ? 'bg-amber-100 text-amber-600' :
-                                                order.status === 'PREPARING' ? 'bg-blue-100 text-blue-600' :
-                                                    order.status === 'DELIVERING' ? 'bg-purple-100 text-purple-600' :
-                                                        order.status === 'DELIVERED' ? 'bg-green-100 text-green-600' :
-                                                            'bg-gray-100 text-gray-600'
+                                            order.status === 'PREPARING' ? 'bg-blue-100 text-blue-600' :
+                                                order.status === 'DELIVERING' ? 'bg-purple-100 text-purple-600' :
+                                                    order.status === 'DELIVERED' ? 'bg-green-100 text-green-600' :
+                                                        'bg-gray-100 text-gray-600'
                                             }`}>{order.status}</span>
                                     </div>
                                     <div className="p-5 flex-1">
@@ -533,6 +538,31 @@ const RestaurantAdmin = () => {
                                 <div><label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Preço</label><input type="number" step="0.01" className="w-full p-3 bg-gray-50 border rounded-xl outline-none" value={editProductForm.price} onChange={e => setEditProductForm({ ...editProductForm, price: e.target.value })} required /></div>
                                 <div><label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Categoria</label><input className="w-full p-3 bg-gray-50 border rounded-xl outline-none" value={editProductForm.category} onChange={e => setEditProductForm({ ...editProductForm, category: e.target.value })} /></div>
                                 <div className="md:col-span-2"><label className="text-xs font-bold text-gray-400 uppercase mb-2 block">Descrição</label><input className="w-full p-3 bg-gray-50 border rounded-xl outline-none" value={editProductForm.description} onChange={e => setEditProductForm({ ...editProductForm, description: e.target.value })} /></div>
+
+                                <div className="md:col-span-2">
+                                    <label className="text-xs font-bold text-gray-400 uppercase mb-2 block flex items-center gap-2">
+                                        <ImageIcon className="w-3 h-3" /> Foto do Produto
+                                    </label>
+                                    <div className="flex items-center gap-4">
+                                        <label className="cursor-pointer bg-gray-50 border-2 border-dashed border-gray-200 hover:border-red-400 transition p-4 rounded-2xl flex-1 flex flex-col items-center justify-center gap-2">
+                                            <input type="file" className="hidden" onChange={(e) => handleImageUpload(e, 'edit')} accept="image/*" />
+                                            {uploadingImage ? (
+                                                <div className="animate-spin h-4 w-4 border-b-2 border-red-600"></div>
+                                            ) : (
+                                                <div className="flex flex-col items-center gap-1 text-gray-400">
+                                                    <Plus className="w-5 h-5" />
+                                                    <span className="text-xs font-bold">Trocar Foto</span>
+                                                </div>
+                                            )}
+                                        </label>
+                                        {editProductForm.imageUrl && (
+                                            <div className="w-20 h-20 rounded-xl overflow-hidden border border-gray-200 shadow-sm relative group">
+                                                <img src={editProductForm.imageUrl} className="w-full h-full object-cover" alt="Preview" />
+                                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                             <div className="flex justify-end gap-3"><button type="button" onClick={() => setEditingProduct(null)} className="px-6 py-2 font-bold text-gray-500">Cancelar</button><button type="submit" className="bg-red-600 text-white px-8 py-2 rounded-xl font-bold shadow-lg shadow-red-100">Salvar</button></div>
                         </form>
