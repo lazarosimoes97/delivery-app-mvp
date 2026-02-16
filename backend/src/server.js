@@ -25,6 +25,7 @@ const restaurantRoutes = require('./routes/restaurant.routes');
 const orderRoutes = require('./routes/order.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const userRoutes = require('./routes/user.routes');
 
 // Temporary seed endpoint for production (remove after first use)
 app.get('/api/seed', async (req, res) => {
@@ -43,6 +44,7 @@ app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/users', userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

@@ -25,15 +25,13 @@ const Profile = () => {
     };
 
     const menuItems = [
-        { icon: MessageSquare, label: 'Chats', path: '#' },
-        { icon: FileText, label: 'Pedidos', path: '/orders' },
-        { icon: Ticket, label: 'Meus Cupons', path: '#' },
-        { icon: Heart, label: 'Favoritos', path: '#' },
+        { icon: User, label: 'Meus dados', path: '/profile/edit' },
+        { icon: ShieldCheck, label: 'Segurança', path: '/profile/security' },
+        { icon: Heart, label: 'Favoritos', path: '/favorites' },
+        { icon: FileText, label: 'Meus Pedidos', path: '/orders' },
         { icon: CreditCard, label: 'Pagamento', path: '#' },
         { icon: Star, label: 'Fidelidade', path: '#' },
         { icon: HelpCircle, label: 'Ajuda', path: '#' },
-        { icon: Settings, label: 'Meus dados', path: '#' },
-        { icon: ShieldCheck, label: 'Segurança', path: '#' },
     ];
 
     return (

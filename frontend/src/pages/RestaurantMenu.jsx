@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ChevronLeft, Search, Star, Clock, MapPin, Plus, Check } from 'lucide-react';
+import { ChevronLeft, Search, Star, Clock, MapPin, Plus, Check, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 const RestaurantMenu = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isFavorited, setIsFavorited] = useState(false);
     const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -29,6 +32,13 @@ const RestaurantMenu = () => {
                     const categories = [...new Set(response.data.products.map(p => p.category || 'General'))];
                     setActiveCategory(categories[0]);
                 }
+
+                // Check if favorited
+                if (user) {
+                    const favsRes = await axios.get('/users/favorites');
+                    const favorited = favsRes.data.some(f => f.id === id);
+                    setIsFavorited(favorited);
+                }
             } catch (error) {
                 console.error('Error fetching restaurant:', error);
             } finally {
@@ -37,7 +47,19 @@ const RestaurantMenu = () => {
         };
 
         fetchRestaurant();
-    }, [id]);
+    }, [id, user]);
+
+    const toggleFavorite = async (e) => {
+        e.preventDefault();
+        if (!user) return navigate('/login');
+
+        try {
+            const res = await axios.post(`/users/favorites/${id}`);
+            setIsFavorited(res.data.favorited);
+        } catch (error) {
+            console.error('Erro ao favoritar:', error);
+        }
+    };
 
     useEffect(() => {
         if (isSearchOpen && searchInputRef.current) {
@@ -103,10 +125,15 @@ const RestaurantMenu = () => {
                         <button onClick={() => navigate(-1)} className="text-red-500">
                             <ChevronLeft className="w-6 h-6" />
                         </button>
-                        <h1 className="text-sm font-bold text-gray-800 uppercase tracking-wide truncate max-w-[200px]">{restaurant.name}</h1>
-                        <button onClick={() => setIsSearchOpen(true)} className="text-red-500">
-                            <Search className="w-6 h-6" />
-                        </button>
+                        <h1 className="text-sm font-bold text-gray-800 uppercase tracking-wide truncate max-w-[180px]">{restaurant.name}</h1>
+                        <div className="flex items-center gap-3">
+                            <button onClick={toggleFavorite} className="text-red-500 transition-transform active:scale-90">
+                                <Heart className={`w-6 h-6 ${isFavorited ? 'fill-current' : ''}`} />
+                            </button>
+                            <button onClick={() => setIsSearchOpen(true)} className="text-red-500">
+                                <Search className="w-6 h-6" />
+                            </button>
+                        </div>
                     </>
                 )}
             </div>

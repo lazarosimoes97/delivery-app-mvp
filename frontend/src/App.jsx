@@ -11,6 +11,9 @@ import Orders from './pages/Orders';
 import RestaurantAdmin from './pages/RestaurantAdmin';
 import Profile from './pages/Profile';
 import Search from './pages/Search';
+import EditProfile from './pages/EditProfile';
+import Security from './pages/Security';
+import Favorites from './pages/Favorites';
 import BottomNav from './components/BottomNav';
 
 import { LocationProvider } from './context/LocationContext';
@@ -47,6 +50,9 @@ function App() {
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/admin" element={<RestaurantAdmin />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/profile/edit" element={<EditProfile />} />
+                  <Route path="/profile/security" element={<Security />} />
+                  <Route path="/favorites" element={<Favorites />} />
                   <Route path="/search" element={<Search />} />
                 </Routes>
               </div>
