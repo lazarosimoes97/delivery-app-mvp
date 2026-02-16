@@ -61,7 +61,10 @@ exports.getRestaurantById = async (req, res) => {
 exports.updateRestaurant = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, description, category, type, imageUrl } = req.body;
+        const {
+            name, description, category, type, imageUrl,
+            street, number, neighborhood, city, state, zipCode
+        } = req.body;
         const userId = req.user.id;
 
         const restaurant = await prisma.restaurant.findUnique({ where: { id } });
@@ -81,7 +84,13 @@ exports.updateRestaurant = async (req, res) => {
                 description,
                 category,
                 type,
-                imageUrl
+                imageUrl,
+                street,
+                number,
+                neighborhood,
+                city,
+                state,
+                zipCode
             }
         });
 

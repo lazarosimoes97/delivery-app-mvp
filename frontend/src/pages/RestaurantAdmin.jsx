@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import {
     Trash2, Plus, LayoutGrid, ShoppingBag,
     TrendingUp, Store, ExternalLink, Image as ImageIcon,
-    AlertCircle, CheckCircle2, Package, Camera
+    AlertCircle, CheckCircle2, Package, Camera, Pencil, X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -13,7 +13,19 @@ const RestaurantAdmin = () => {
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
+    const [editingProduct, setEditingProduct] = useState(null);
+    const [isEditingSettings, setIsEditingSettings] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+
+    // Edit states
+    const [editProductForm, setEditProductForm] = useState({
+        name: '', description: '', price: '', category: '', imageUrl: ''
+    });
+
+    const [settingsForm, setSettingsForm] = useState({
+        name: '', description: '', category: '', type: '',
+        street: '', number: '', neighborhood: '', city: '', state: '', zipCode: ''
+    });
 
     // Quick Stats (Mocked for now, but ready for API)
     const [stats] = useState({
@@ -104,6 +116,61 @@ const RestaurantAdmin = () => {
             }));
         } catch (error) {
             alert('Falha ao excluir produto');
+        }
+    };
+
+    const handleEditProduct = (product) => {
+        setEditingProduct(product);
+        setEditProductForm({
+            name: product.name,
+            description: product.description || '',
+            price: product.price.toString(),
+            category: product.category || '',
+            imageUrl: product.imageUrl || ''
+        });
+    };
+
+    const handleUpdateProduct = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.put(`/restaurants/products/${editingProduct.id}`, {
+                ...editProductForm,
+                price: parseFloat(editProductForm.price)
+            });
+            setRestaurant(prev => ({
+                ...prev,
+                products: prev.products.map(p => p.id === editingProduct.id ? res.data : p)
+            }));
+            setEditingProduct(null);
+        } catch (error) {
+            alert('Falha ao atualizar produto');
+        }
+    };
+
+    const handleOpenSettings = () => {
+        setSettingsForm({
+            name: restaurant.name,
+            description: restaurant.description || '',
+            category: restaurant.category || '',
+            type: restaurant.type || '',
+            street: restaurant.street || '',
+            number: restaurant.number || '',
+            neighborhood: restaurant.neighborhood || '',
+            city: restaurant.city || '',
+            state: restaurant.state || '',
+            zipCode: restaurant.zipCode || ''
+        });
+        setIsEditingSettings(true);
+    };
+
+    const handleUpdateSettings = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await axios.put(`/restaurants/${restaurant.id}`, settingsForm);
+            setRestaurant(prev => ({ ...prev, ...res.data }));
+            setIsEditingSettings(false);
+        } catch (error) {
+            alert('Falha ao atualizar configurações');
         }
     };
 
@@ -203,7 +270,10 @@ const RestaurantAdmin = () => {
                                 <ExternalLink className="w-4 h-4" />
                                 Ver Cardápio
                             </Link>
-                            <button className="bg-red-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-red-700 transition shadow-lg shadow-red-100">
+                            <button
+                                onClick={handleOpenSettings}
+                                className="bg-red-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-red-700 transition shadow-lg shadow-red-100"
+                            >
                                 Configurações
                             </button>
                         </div>
@@ -395,12 +465,20 @@ const RestaurantAdmin = () => {
                                                     <p className="text-gray-500 text-sm truncate">{product.description || 'Sem descrição'}</p>
                                                     <div className="mt-1 font-bold text-red-600">R$ {product.price.toFixed(2)}</div>
                                                 </div>
-                                                <button
-                                                    onClick={() => handleDeleteProduct(product.id)}
-                                                    className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => handleEditProduct(product)}
+                                                        className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition"
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteProduct(product.id)}
+                                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -410,6 +488,173 @@ const RestaurantAdmin = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Edit Product Modal */}
+            {editingProduct && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="text-xl font-bold text-gray-800">Editar Produto</h3>
+                            <button onClick={() => setEditingProduct(null)} className="text-gray-400 hover:text-red-500 transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdateProduct} className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Nome</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={editProductForm.name}
+                                        onChange={e => setEditProductForm({ ...editProductForm, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="md:col-span-2 text-sm text-gray-500 flex items-center gap-2 mb-2">
+                                    <Camera className="w-4 h-4" /> Outros campos podem ser editados no restaurante.
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Preço (R$)</label>
+                                    <input
+                                        type="number" step="0.01"
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={editProductForm.price}
+                                        onChange={e => setEditProductForm({ ...editProductForm, price: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Categoria</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={editProductForm.category}
+                                        onChange={e => setEditProductForm({ ...editProductForm, category: e.target.value })}
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Descrição</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={editProductForm.description}
+                                        onChange={e => setEditProductForm({ ...editProductForm, description: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3">
+                                <button type="button" onClick={() => setEditingProduct(null)} className="px-6 py-2.5 font-bold text-gray-500">Cancelar</button>
+                                <button type="submit" className="bg-red-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-red-100">Atualizar Produto</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Settings Modal */}
+            {isEditingSettings && (
+                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+                        <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                            <h3 className="text-xl font-bold text-gray-800">Configurações da Loja</h3>
+                            <button onClick={() => setIsEditingSettings(false)} className="text-gray-400 hover:text-red-500 transition-colors">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <form onSubmit={handleUpdateSettings} className="p-6 overflow-y-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Nome do Restaurante</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.name}
+                                        onChange={e => setSettingsForm({ ...settingsForm, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Descrição</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.description}
+                                        onChange={e => setSettingsForm({ ...settingsForm, description: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Categoria</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.category}
+                                        onChange={e => setSettingsForm({ ...settingsForm, category: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Tipo</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.type}
+                                        onChange={e => setSettingsForm({ ...settingsForm, type: e.target.value })}
+                                    />
+                                </div>
+                                <div className="md:col-span-2">
+                                    <h4 className="font-bold text-gray-400 text-xs uppercase mb-2 border-b pb-1">Endereço</h4>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Rua</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.street}
+                                        onChange={e => setSettingsForm({ ...settingsForm, street: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Número</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.number}
+                                        onChange={e => setSettingsForm({ ...settingsForm, number: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Bairro</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.neighborhood}
+                                        onChange={e => setSettingsForm({ ...settingsForm, neighborhood: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Cidade</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.city}
+                                        onChange={e => setSettingsForm({ ...settingsForm, city: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">Estado (UF)</label>
+                                    <input
+                                        maxLength="2"
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.state}
+                                        onChange={e => setSettingsForm({ ...settingsForm, state: e.target.value.toUpperCase() })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase mb-2">CEP</label>
+                                    <input
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none"
+                                        value={settingsForm.zipCode}
+                                        onChange={e => setSettingsForm({ ...settingsForm, zipCode: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 sticky bottom-0 bg-white pt-4">
+                                <button type="button" onClick={() => setIsEditingSettings(false)} className="px-6 py-2.5 font-bold text-gray-500">Cancelar</button>
+                                <button type="submit" className="bg-red-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-red-100">Salvar Alterações</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
