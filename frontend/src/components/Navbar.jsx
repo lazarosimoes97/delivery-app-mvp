@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, User, LogOut, ChevronDown, Store, Package, Settings } from 'lucide-react';
@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 const Navbar = () => {
     const { user, logout } = useAuth();
     const { cartTotal, cartItemsCount } = useCart();
+    const navigate = useNavigate();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const userMenuRef = useRef(null);
 
@@ -110,7 +111,11 @@ const Navbar = () => {
 
                                         <div className="p-2 pt-0 border-t border-gray-50">
                                             <button
-                                                onClick={() => { logout(); setIsUserMenuOpen(false); }}
+                                                onClick={() => {
+                                                    logout();
+                                                    setIsUserMenuOpen(false);
+                                                    navigate('/login');
+                                                }}
                                                 className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                             >
                                                 <LogOut className="w-4 h-4" /> Sair da conta
