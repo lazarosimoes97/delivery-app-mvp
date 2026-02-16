@@ -19,6 +19,7 @@ const RestaurantMenu = () => {
     const categoryRefs = useRef({});
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         const fetchRestaurant = async () => {
             try {
                 const response = await axios.get(`/restaurants/${id}`);

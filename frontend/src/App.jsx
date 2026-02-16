@@ -14,6 +14,19 @@ import Search from './pages/Search';
 import BottomNav from './components/BottomNav';
 
 import { LocationProvider } from './context/LocationContext';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+
+// Simple utility to scroll to top on page change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 function App() {
   return (
@@ -21,6 +34,7 @@ function App() {
       <AuthProvider>
         <CartProvider>
           <Router>
+            <ScrollToTop />
             <div className="min-h-screen bg-gray-50 flex flex-col">
               <Navbar />
               <div className="flex-grow container mx-auto px-4 py-8 mb-16 md:mb-0">
