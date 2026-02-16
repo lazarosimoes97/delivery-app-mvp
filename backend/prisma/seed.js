@@ -28,8 +28,8 @@ async function main() {
             products: [
                 { name: 'X-Tudo Charqueada', price: 28.90, desc: 'Pão, carne 180g, queijo, bacon, ovo, alface e tomate.', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80' },
                 { name: 'Smash Simples', price: 18.00, desc: 'Pão, blend 90g e queijo prato.', img: 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&q=80' },
-                { name: 'Batata Frita G', price: 15.00, desc: 'Porção generosa de batatas crocantes.', img: 'https://images.unsplash.com/photo-1573080496987-a20c90c79f97?w=500&q=80' },
-                { name: 'Milkshake Chocolate', price: 14.00, desc: '500ml de pura cremosidade.', img: 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=500&q=80' },
+                { name: 'Batata Frita G', price: 15.00, desc: 'Porção generosa de batatas crocantes.', img: 'https://images.unsplash.com/photo-1630384066255-4427b59ac3a5?w=500&q=80' },
+                { name: 'Milkshake Chocolate', price: 14.00, desc: '500ml de pura cremosidade.', img: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500&q=80' },
                 { name: 'Coca Zero 600ml', price: 8.50, desc: 'Refrescante e gelada.', img: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&q=80' }
             ]
         },
