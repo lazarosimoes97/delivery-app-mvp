@@ -119,12 +119,23 @@ exports.createPixPayment = async (req, res) => {
         };
 
         // Adicionar taxa da plataforma (10%) se o restaurante estiver conectado
+        // COMENTADO TEMPORARIAMENTE PARA DEPURAR ERRO EM PRODUÇÃO
+        /*
         if (order.restaurant.mpAccessToken) {
             const fee = Number((order.total * 0.10).toFixed(2));
             paymentData.application_fee = fee;
         }
+        */
+
+        console.log('Enviando dados para Mercado Pago:', JSON.stringify(paymentData, null, 2));
 
         const payment = await clientToUse.create({ body: paymentData });
+
+        console.log('Resposta do Mercado Pago:', JSON.stringify(payment, null, 2));
+
+        if (!payment.point_of_interaction || !payment.point_of_interaction.transaction_data) {
+            throw new Error('Resposta do Mercado Pago não contém dados do QR Code');
+        }
 
         await prisma.order.update({
             where: { id: orderId },
@@ -142,8 +153,15 @@ exports.createPixPayment = async (req, res) => {
             qr_code_base64: payment.point_of_interaction.transaction_data.qr_code_base64
         });
     } catch (error) {
-        console.error('Erro ao criar pagamento PIX:', error);
-        res.status(500).json({ message: 'Erro ao processar pagamento PIX' });
+        console.error('ERRO DETALHADO PIX:', error);
+        // Log extra para o objeto de erro do MP se existir
+        if (error.response) {
+            console.error('RESPOSTA DE ERRO MP:', JSON.stringify(error.response, null, 2));
+        }
+        res.status(500).json({
+            message: 'Erro ao processar pagamento PIX',
+            details: error.message
+        });
     }
 };
 
