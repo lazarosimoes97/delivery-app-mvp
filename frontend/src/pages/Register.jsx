@@ -165,43 +165,76 @@ const Register = () => {
 
     if (step === 1) {
         return (
-            <div className="flex justify-center items-center min-h-[80vh] bg-gray-50 px-4">
-                <div className="max-w-2xl w-full">
-                    <h2 className="text-3xl font-bold text-center text-gray-800 mb-8">Como você deseja usar o app?</h2>
+            <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+                {/* Background Decor */}
+                <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-br from-red-600 to-red-800 transform -skew-y-6 origin-top-left z-0"></div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
+                <div className="relative z-10 max-w-4xl mx-auto w-full">
+                    <div className="text-center mb-12 animate-in slide-in-from-bottom-5 duration-700 fade-in">
+                        <div className="flex justify-center mb-4">
+                            <div className="bg-white p-3 rounded-2xl shadow-xl shadow-red-900/20">
+                                <Store className="w-10 h-10 text-red-600" />
+                            </div>
+                        </div>
+                        <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
+                            Bem-vindo ao Charq<span className="text-red-600">Food</span>
+                        </h2>
+                        <p className="text-lg text-gray-600 max-w-lg mx-auto font-medium">
+                            Conectando sabores e pessoas. Como você deseja participar dessa experiência?
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+                        {/* Client Card */}
                         <button
                             onClick={() => handleRoleSelection('CLIENT')}
-                            className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-all border-2 border-transparent hover:border-red-500 group text-left"
+                            className="group relative bg-white rounded-3xl p-8 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-red-500/10 transition-all duration-300 border-2 border-transparent hover:border-red-500 text-left w-full overflow-hidden animate-in zoom-in-95 duration-500 delay-100 fill-mode-backwards"
                         >
-                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <User className="w-8 h-8 text-red-600" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Quero Pedir</h3>
-                            <p className="text-gray-600 mb-4">Encontre seus restaurantes favoritos e receba em casa.</p>
-                            <div className="flex items-center text-red-600 font-medium">
-                                Criar conta de usuário <ChevronRight className="w-4 h-4 ml-1" />
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-500"></div>
+
+                            <div className="relative z-10">
+                                <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mb-6 text-red-600 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm">
+                                    <User className="w-8 h-8" strokeWidth={2.5} />
+                                </div>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2 group-hover:text-red-600 transition-colors">
+                                    Quero Pedir
+                                </h3>
+                                <p className="text-gray-500 mb-8 font-medium leading-relaxed">
+                                    Explore os melhores restaurantes da cidade e receba sua comida favorita no conforto de casa.
+                                </p>
+                                <div className="flex items-center text-red-600 font-bold group-hover:translate-x-2 transition-transform">
+                                    Criar conta grátis <ChevronRight className="w-5 h-5 ml-1" strokeWidth={3} />
+                                </div>
                             </div>
                         </button>
 
+                        {/* Restaurant Card */}
                         <button
                             onClick={() => handleRoleSelection('RESTAURANT_OWNER')}
-                            className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-all border-2 border-transparent hover:border-blue-500 group text-left"
+                            className="group relative bg-white rounded-3xl p-8 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 border-2 border-transparent hover:border-blue-500 text-left w-full overflow-hidden animate-in zoom-in-95 duration-500 delay-200 fill-mode-backwards"
                         >
-                            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                <Store className="w-8 h-8 text-blue-600" />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-800 mb-2">Quero Vender</h3>
-                            <p className="text-gray-600 mb-4">Gerencie seu restaurante, cardápio e receba pedidos.</p>
-                            <div className="flex items-center text-blue-600 font-medium">
-                                Cadastrar meu restaurante <ChevronRight className="w-4 h-4 ml-1" />
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-500"></div>
+
+                            <div className="relative z-10">
+                                <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 text-blue-600 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-sm">
+                                    <Store className="w-8 h-8" strokeWidth={2.5} />
+                                </div>
+                                <h3 className="text-2xl font-black text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                                    Quero Vender
+                                </h3>
+                                <p className="text-gray-500 mb-8 font-medium leading-relaxed">
+                                    Gerencie seu cardápio, receba pedidos em tempo real e expanda seu negócio com nossa plataforma.
+                                </p>
+                                <div className="flex items-center text-blue-600 font-bold group-hover:translate-x-2 transition-transform">
+                                    Parceiro Comercial <ChevronRight className="w-5 h-5 ml-1" strokeWidth={3} />
+                                </div>
                             </div>
                         </button>
                     </div>
 
-                    <div className="text-center mt-8">
-                        <p className="text-gray-600">
-                            Já tem uma conta? <Link to="/login" className="text-red-600 hover:underline font-medium">Fazer Login</Link>
+                    <div className="text-center mt-12 animate-in fade-in duration-1000 delay-300">
+                        <p className="text-gray-500 font-medium">
+                            Já possui uma conta? <Link to="/login" className="text-red-600 hover:text-red-700 font-bold hover:underline ml-1">Fazer Login</Link>
                         </p>
                     </div>
                 </div>
