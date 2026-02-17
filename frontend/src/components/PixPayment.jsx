@@ -80,12 +80,16 @@ const PixPayment = ({ orderId, total, onSuccess }) => {
             </div>
 
             {/* QR Code */}
-            <div className="bg-white p-4 rounded-lg border-2 border-gray-200 mb-4">
-                <img
-                    src={`data:image/png;base64,${pixData.qrCodeBase64}`}
-                    alt="QR Code PIX"
-                    className="w-64 h-64"
-                />
+            <div className="bg-white p-4 rounded-lg border-2 border-gray-200 mb-4 flex items-center justify-center min-h-[260px] min-w-[260px]">
+                {(pixData.qr_code_base64 || pixData.qrCodeBase64) ? (
+                    <img
+                        src={`data:image/png;base64,${pixData.qr_code_base64 || pixData.qrCodeBase64}`}
+                        alt="QR Code PIX"
+                        className="w-64 h-64"
+                    />
+                ) : (
+                    <div className="text-gray-400 text-sm">QR Code indisponível</div>
+                )}
             </div>
 
             {/* Instructions */}

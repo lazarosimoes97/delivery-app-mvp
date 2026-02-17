@@ -1,15 +1,13 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import PixPayment from './PixPayment';
-import CardPayment from './CardPayment';
+import { useCart } from '../context/CartContext';
 
 const PaymentModal = ({ isOpen, onClose, orderId, total }) => {
     const navigate = useNavigate();
+    const { clearCart } = useCart();
     const [paymentMethod, setPaymentMethod] = useState(null);
 
     const handlePaymentSuccess = () => {
         alert('Pagamento confirmado! Seu pedido está sendo preparado.');
+        clearCart();
         onClose();
         navigate('/orders');
     };
