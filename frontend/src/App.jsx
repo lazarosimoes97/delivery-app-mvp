@@ -47,7 +47,7 @@ function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/restaurant/:id" element={<RestaurantMenu />} />
-                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
                   <Route path="/search" element={<Search />} />
 
                   {/* Private Routes */}

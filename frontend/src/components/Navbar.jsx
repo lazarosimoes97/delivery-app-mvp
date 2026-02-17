@@ -34,23 +34,25 @@ const Navbar = () => {
                 </Link>
 
                 <div className="flex items-center gap-3 md:gap-6">
-                    {/* Cart Button - Visible to everyone */}
-                    <Link
-                        to="/cart"
-                        className="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-2 rounded-xl hover:bg-red-100 transition-all duration-300 relative group"
-                    >
-                        <div className="relative">
-                            <ShoppingCart className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
-                            {cartItemsCount > 0 && (
-                                <span className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white animate-in zoom-in">
-                                    {cartItemsCount}
-                                </span>
-                            )}
-                        </div>
-                        <span className="hidden md:inline font-bold text-sm">
-                            R$ {cartTotal.toFixed(2)}
-                        </span>
-                    </Link>
+                    {/* Cart Button - Visible only to logged in users */}
+                    {user && (
+                        <Link
+                            to="/cart"
+                            className="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-2 rounded-xl hover:bg-red-100 transition-all duration-300 relative group"
+                        >
+                            <div className="relative">
+                                <ShoppingCart className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
+                                {cartItemsCount > 0 && (
+                                    <span className="absolute -top-3 -right-3 bg-red-600 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center border-2 border-white animate-in zoom-in">
+                                        {cartItemsCount}
+                                    </span>
+                                )}
+                            </div>
+                            <span className="hidden md:inline font-bold text-sm">
+                                R$ {cartTotal.toFixed(2)}
+                            </span>
+                        </Link>
+                    )}
 
                     {user ? (
                         /* User Menu Dropdown */
