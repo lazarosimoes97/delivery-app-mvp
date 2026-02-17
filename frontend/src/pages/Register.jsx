@@ -23,6 +23,7 @@ const Register = () => {
     const [description, setDescription] = useState('');
     const [restaurantImage, setRestaurantImage] = useState('');
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [location, setLocation] = useState({ lat: -22.50972, lng: -47.77806 }); // Default Charqueada
 
     const handleRestaurantImageUpload = async (e) => {
         const file = e.target.files[0];
