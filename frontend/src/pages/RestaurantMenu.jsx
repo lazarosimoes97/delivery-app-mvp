@@ -200,52 +200,77 @@ const RestaurantMenu = () => {
     );
 };
 
+import ConfirmModal from '../components/ConfirmModal';
+
 const AddToOrderButton = ({ product, restaurantId, addToCart }) => {
     const [added, setAdded] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [showSwitchModal, setShowSwitchModal] = useState(false);
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const handleClick = (e) => {
-        e.stopPropagation();
-
-        console.log('Botão + clicado:', { productId: product.id, restaurantId, userLoggedIn: !!user });
-
-        if (!user) {
-            if (window.confirm('Você precisa estar logado para adicionar itens ao carrinho. Deseja fazer login agora?')) {
-                navigate('/login', { state: { from: window.location.pathname } });
-            }
+    const handleAdd = (force = false) => {
+        const success = addToCart(product, 1, restaurantId, force);
+        if (success === false) {
+            setShowSwitchModal(true);
             return;
         }
+        setAdded(true);
+        setTimeout(() => setAdded(false), 2000);
+    };
 
-        try {
-            addToCart(product, 1, restaurantId);
-            setAdded(true);
-            setTimeout(() => setAdded(false), 2000);
-        } catch (error) {
-            console.error('Erro ao adicionar ao carrinho:', error);
-            alert('Erro ao adicionar item ao carrinho. Tente novamente.');
+    const handleClick = (e) => {
+        e.stopPropagation();
+        if (!user) {
+            setShowLoginModal(true);
+            return;
         }
+        handleAdd();
     };
 
     return (
-        <button
-            onClick={handleClick}
-            type="button"
-            className={`absolute bottom-[-10px] right-[-5px] shadow-md p-1.5 rounded-full border border-gray-100 transition-all duration-300 flex items-center justify-center min-w-[32px] h-[32px] z-10 ${added ? 'bg-green-500 text-white scale-110' : 'bg-white text-red-600'
-                }`}
-        >
-            {added ? (
-                <Check className="w-5 h-5 animate-in zoom-in duration-300" />
-            ) : (
-                <Plus className="w-5 h-5" />
-            )}
+        <>
+            <button
+                onClick={handleClick}
+                type="button"
+                className={`absolute bottom-[-10px] right-[-5px] shadow-md p-1.5 rounded-full border border-gray-100 transition-all duration-300 flex items-center justify-center min-w-[32px] h-[32px] z-10 ${added ? 'bg-green-500 text-white scale-110' : 'bg-white text-red-600'
+                    }`}
+            >
+                {added ? (
+                    <Check className="w-5 h-5 animate-in zoom-in duration-300" />
+                ) : (
+                    <Plus className="w-5 h-5" />
+                )}
 
-            {added && (
-                <span className="absolute -top-8 right-0 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap animate-bounce">
-                    Adicionado!
-                </span>
-            )}
-        </button>
+                {added && (
+                    <span className="absolute -top-8 right-0 bg-gray-800 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap animate-bounce">
+                        Adicionado!
+                    </span>
+                )}
+            </button>
+
+            {/* Login Required Modal */}
+            <ConfirmModal
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+                onConfirm={() => navigate('/login', { state: { from: window.location.pathname } })}
+                title="Quase lá! 👋"
+                message="Você precisa entrar na sua conta para adicionar itens ao carrinho. Vamos fazer login?"
+                confirmText="Fazer Login"
+                type="danger"
+            />
+
+            {/* Switch Restaurant Modal */}
+            <ConfirmModal
+                isOpen={showSwitchModal}
+                onClose={() => setShowSwitchModal(false)}
+                onConfirm={() => handleAdd(true)}
+                title="Mudar de Restaurante?"
+                message="Seu carrinho já tem itens de outro restaurante. Deseja limpá-lo e iniciar um novo pedido aqui?"
+                confirmText="Iniciar Novo Pedido"
+                type="warning"
+            />
+        </>
     );
 };
 

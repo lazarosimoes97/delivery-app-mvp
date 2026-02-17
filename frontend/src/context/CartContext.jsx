@@ -31,26 +31,26 @@ export const CartProvider = ({ children }) => {
         }
     }, [user?.id]);
 
-    const addToCart = (product, quantity, restaurantId) => {
-        // Verificar se é de um restaurante diferente antes de entrar no setCart
-        if (cart.restaurantId && cart.restaurantId !== restaurantId) {
-            if (!window.confirm("Deseja iniciar um novo carrinho? Adicionar itens de um restaurante diferente limpará seu carrinho atual.")) {
-                return;
-            }
-            // Iniciar novo carrinho
-            setCart({
-                restaurantId,
-                items: [{
-                    productId: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity
-                }]
-            });
-            return;
+    const addToCart = (product, quantity, restaurantId, ignoreCheck = false) => {
+        // Verificar se é de um restaurante diferente
+        if (!ignoreCheck && cart.restaurantId && cart.restaurantId !== restaurantId) {
+            return false; // Sinaliza que precisa de confirmação externa
         }
 
         setCart((prevCart) => {
+            // Em caso de troca forçada (ignoreCheck), resetamos o carrinho com o novo restaurante
+            if (ignoreCheck && prevCart.restaurantId !== restaurantId) {
+                return {
+                    restaurantId,
+                    items: [{
+                        productId: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity
+                    }]
+                };
+            }
+
             const currentRestaurantId = restaurantId;
             const newItems = [...prevCart.items];
 
