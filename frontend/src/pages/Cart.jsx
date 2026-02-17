@@ -117,7 +117,6 @@ const Cart = () => {
                 isOpen={showPaymentModal}
                 onClose={() => {
                     setShowPaymentModal(false);
-                    navigate('/orders');
                 }}
                 orderId={currentOrderId}
                 total={cartTotal}
