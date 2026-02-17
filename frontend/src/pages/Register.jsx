@@ -167,8 +167,8 @@ const Register = () => {
     if (step === 1) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-br from-red-600 to-red-800 transform -skew-y-6 origin-top-left z-0"></div>
+                {/* Background Decor - Adjusted height and color for better mobile fit */}
+                <div className="absolute top-0 left-0 w-full h-[55vh] min-h-[420px] bg-gradient-to-br from-red-600 to-red-800 transform -skew-y-6 origin-top-left z-0 shadow-2xl"></div>
 
                 <div className="relative z-10 max-w-4xl mx-auto w-full">
                     <div className="text-center mb-12 animate-in slide-in-from-bottom-5 duration-700 fade-in">
@@ -177,10 +177,10 @@ const Register = () => {
                                 <Store className="w-10 h-10 text-red-600" />
                             </div>
                         </div>
-                        <h2 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
-                            Bem-vindo ao Charq<span className="text-red-600">Food</span>
+                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-md">
+                            Bem-vindo ao Charq<span className="text-yellow-400">Food</span>
                         </h2>
-                        <p className="text-lg text-gray-600 max-w-lg mx-auto font-medium">
+                        <p className="text-lg md:text-xl text-red-50 max-w-lg mx-auto font-medium leading-relaxed drop-shadow-sm px-4">
                             Conectando sabores e pessoas. Como você deseja participar dessa experiência?
                         </p>
                     </div>
@@ -189,7 +189,7 @@ const Register = () => {
                         {/* Client Card */}
                         <button
                             onClick={() => handleRoleSelection('CLIENT')}
-                            className="group relative bg-white rounded-3xl p-8 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-red-500/10 transition-all duration-300 border-2 border-transparent hover:border-red-500 text-left w-full overflow-hidden animate-in zoom-in-95 duration-500 delay-100 fill-mode-backwards"
+                            className="group relative bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl shadow-red-900/10 hover:shadow-2xl hover:shadow-red-900/20 transition-all duration-300 border-2 border-transparent hover:border-red-500 text-left w-full overflow-hidden animate-in zoom-in-95 duration-500 delay-100 fill-mode-backwards translate-y-0 hover:-translate-y-1"
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-500"></div>
 
@@ -212,7 +212,7 @@ const Register = () => {
                         {/* Restaurant Card */}
                         <button
                             onClick={() => handleRoleSelection('RESTAURANT_OWNER')}
-                            className="group relative bg-white rounded-3xl p-8 shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 border-2 border-transparent hover:border-blue-500 text-left w-full overflow-hidden animate-in zoom-in-95 duration-500 delay-200 fill-mode-backwards"
+                            className="group relative bg-white/95 backdrop-blur-sm rounded-3xl p-8 shadow-xl shadow-blue-900/10 hover:shadow-2xl hover:shadow-blue-900/20 transition-all duration-300 border-2 border-transparent hover:border-blue-500 text-left w-full overflow-hidden animate-in zoom-in-95 duration-500 delay-200 fill-mode-backwards translate-y-0 hover:-translate-y-1"
                         >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -mr-10 -mt-10 transition-transform group-hover:scale-150 duration-500"></div>
 
@@ -233,8 +233,8 @@ const Register = () => {
                         </button>
                     </div>
 
-                    <div className="text-center mt-12 animate-in fade-in duration-1000 delay-300">
-                        <p className="text-gray-500 font-medium">
+                    <div className="text-center mt-12 animate-in fade-in duration-1000 delay-300 relative z-10">
+                        <p className="text-gray-500 font-medium bg-white/80 inline-block px-4 py-2 rounded-full backdrop-blur-sm shadow-sm md:bg-transparent md:shadow-none">
                             Já possui uma conta? <Link to="/login" className="text-red-600 hover:text-red-700 font-bold hover:underline ml-1">Fazer Login</Link>
                         </p>
                     </div>
