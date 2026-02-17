@@ -26,6 +26,23 @@ function LocationMarker({ position, setPosition }) {
     );
 }
 
+// Component to recenter map when coordinates change
+function ChangeView({ center }) {
+    const map = L.DomUtil.get('map') ? null : useMapEvents({}); // This is just to get access to map instance via useMap if needed
+    // Actually simpler way in react-leaflet:
+    const leafletMap = L.DomUtil.get('map') ? null : null; // ignore
+    return null;
+}
+
+import { useMap } from 'react-leaflet';
+function RecenterMap({ center }) {
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center);
+    }, [center, map]);
+    return null;
+}
+
 const LocationModal = ({ isOpen, onClose }) => {
     const { updateLocation } = useLocation();
     const [view, setView] = useState('initial'); // initial, map, loading
@@ -48,9 +65,11 @@ const LocationModal = ({ isOpen, onClose }) => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                updateLocation({ lat: latitude, lng: longitude });
+                const newCoords = { lat: latitude, lng: longitude };
+                setMarkerPosition(newCoords);
+                setMapPosition(newCoords);
+                setView('map');
                 setLoading(false);
-                onClose();
             },
             (err) => {
                 console.error(err);
@@ -60,7 +79,8 @@ const LocationModal = ({ isOpen, onClose }) => {
                     setError('Não foi possível obter sua localização. Tente novamente ou selecione no mapa.');
                 }
                 setLoading(false);
-            }
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
         );
     };
 
@@ -123,6 +143,7 @@ const LocationModal = ({ isOpen, onClose }) => {
                                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                                     />
+                                    <RecenterMap center={mapPosition} />
                                     <LocationMarker position={markerPosition} setPosition={setMarkerPosition} />
                                 </MapContainer>
                                 {!markerPosition && (
