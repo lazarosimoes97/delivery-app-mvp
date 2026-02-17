@@ -119,13 +119,10 @@ exports.createPixPayment = async (req, res) => {
         };
 
         // Adicionar taxa da plataforma (10%) se o restaurante estiver conectado
-        // COMENTADO TEMPORARIAMENTE PARA DEPURAR ERRO EM PRODUÇÃO
-        /*
         if (order.restaurant.mpAccessToken) {
             const fee = Number((order.total * 0.10).toFixed(2));
             paymentData.application_fee = fee;
         }
-        */
 
         console.log('Enviando dados para Mercado Pago:', JSON.stringify(paymentData, null, 2));
 
