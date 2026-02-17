@@ -43,8 +43,9 @@ const PixPayment = ({ orderId, total, onSuccess }) => {
     };
 
     const copyPixCode = () => {
-        if (pixData?.qrCode) {
-            navigator.clipboard.writeText(pixData.qrCode);
+        const codeToCopy = pixData?.qr_code || pixData?.qrCode;
+        if (codeToCopy) {
+            navigator.clipboard.writeText(codeToCopy);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         }
